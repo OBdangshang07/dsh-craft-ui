@@ -1,0 +1,4 @@
+# DSH Craft UI bundle layer. The row id is intentionally stable across releases.
+- insert:
+    - id: craft-ui
+      name: dsh-craft-ui

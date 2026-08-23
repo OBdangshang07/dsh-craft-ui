@@ -1,0 +1,8 @@
+node_modules/
+lib/
+.generated/
+*.tgz
+coverage/
+test-results/
+playwright-report/
+videos/

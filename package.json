@@ -1,0 +1,79 @@
+{
+  "name": "dsh-craft-ui",
+  "version": "0.2.1",
+  "description": "A high-fidelity Minecraft-inspired UI and gameplay layer for DeepSeek Harness",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./assets/manifest.json": "./assets/generated/manifest.json",
+    "./assets/font.woff2": "./assets/fonts/fusion-pixel-10px-monospaced-zh-hans.woff2",
+    "./assets/font-license.txt": "./assets/fonts/OFL.txt",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "assets/generated",
+    "assets/fonts",
+    "cordis.patch.yml",
+    "README.md",
+    "docs",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-theme",
+        "@deepseek-ai/dsh-client-ui-slots",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  },
+  "scripts": {
+    "assets": "node scripts/generate-assets.mjs",
+    "build": "node scripts/build.mjs",
+    "preview:build": "node scripts/build-preview.mjs",
+    "check": "tsc --noEmit && node --test test/*.test.mjs",
+    "verify": "npm run assets && npm run build && npm run check && node scripts/verify-package.mjs",
+    "audit:pack": "node scripts/audit-tarball.mjs",
+    "prepare": "npm run build",
+    "prepack": "npm run verify"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh-plugin",
+    "minecraft",
+    "pixel-ui",
+    "theme"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "react": ">=18.2.0 <19"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1",
+    "fflate": "^0.8.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "@types/react": "~18.3.1",
+    "esbuild": "^0.25.9",
+    "react": "^18.2.0",
+    "typescript": "^5.9.2"
+  }
+}

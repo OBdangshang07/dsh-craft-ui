@@ -1,0 +1,110 @@
+{
+  "version": 2,
+  "license": "MIT",
+  "generated": true,
+  "sprites": {
+    "button.normal": {
+      "file": "button-normal.png",
+      "size": [
+        24,
+        20
+      ],
+      "scaleType": "nine_slice",
+      "border": [
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "button.hover": {
+      "file": "button-hover.png",
+      "size": [
+        24,
+        20
+      ],
+      "scaleType": "nine_slice",
+      "border": [
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "button.pressed": {
+      "file": "button-pressed.png",
+      "size": [
+        24,
+        20
+      ],
+      "scaleType": "nine_slice",
+      "border": [
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "panel": {
+      "file": "panel.png",
+      "size": [
+        24,
+        24
+      ],
+      "scaleType": "nine_slice",
+      "border": [
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "tooltip": {
+      "file": "tooltip.png",
+      "size": [
+        16,
+        16
+      ],
+      "scaleType": "nine_slice",
+      "border": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+    "icons": {
+      "file": "icons.png",
+      "size": [
+        144,
+        16
+      ],
+      "scaleType": "fixed",
+      "cell": [
+        16,
+        16
+      ]
+    }
+  },
+  "textures": [
+    "stone.png",
+    "deepslate.png",
+    "planks.png",
+    "parchment.png"
+  ],
+  "fonts": {
+    "ui": {
+      "file": "../fonts/fusion-pixel-10px-monospaced-zh-hans.woff2",
+      "family": "Craft Pixel",
+      "format": "woff2",
+      "language": "zh-Hans",
+      "license": "OFL-1.1",
+      "licenseFile": "../fonts/OFL.txt",
+      "componentLicenseFiles": [
+        "../fonts/LICENSES/ark-pixel/OFL.txt",
+        "../fonts/LICENSES/boutique-bitmap-9x9/OFL.txt",
+        "../fonts/LICENSES/galmuri/LICENSE.txt"
+      ]
+    }
+  }
+}
