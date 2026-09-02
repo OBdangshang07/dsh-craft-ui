@@ -1,3 +1,5 @@
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 # DSH Craft UI
 
 An unofficial, high-fidelity Minecraft-inspired interface and gameplay layer for DeepSeek Harness. It keeps Harness actions and state authoritative while presenting them as a productive game HUD.
@@ -62,7 +64,7 @@ The client embeds `Fusion Pixel 10px Monospaced zh-Hans` as WOFF2 at build time,
 
 - Full, reduced, and off motion modes are available; the operating-system reduced-motion preference wins.
 - Keyboard focus remains visible.
-- HUD elements are pointer-transparent and do not cover native actions.
+- HUD elements are pointer-transparent and dynamically clear native tasks, running status, and action controls.
 - Responsive layouts hide nonessential HUD elements before shrinking core controls.
 - Approval, question, and plan-review behavior remains owned by Harness.
 - Disabling or unloading the plugin restores the previous Harness theme and document color scheme.
