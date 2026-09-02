@@ -38,6 +38,17 @@ test('passive XP bar hugs the composer instead of covering message metadata', as
   assert.match(css, /\.craft-overlay-no-hotbar \.craft-xp\{[^}]*right:var\(--craft-composer-right,12px\);bottom:calc\(var\(--craft-hud-bottom,12px\) - 8px\)/)
 })
 
+test('active hotbar clears the native task dock and running status footer', async () => {
+  const css = await readFile(join(root, 'src/client/style.css'), 'utf8')
+  const overlay = await readFile(join(root, 'src/client/components/CraftOverlay.tsx'), 'utf8')
+  assert.match(overlay, /document\.querySelector\('\[data-composer-seat\]'\)/)
+  assert.match(overlay, /resizeObserver\.observe\(composerSeat\)/)
+  assert.match(overlay, /document\.body\.classList\.toggle\('craft-hotbar-active', active\)/)
+  assert.match(overlay, /document\.body\.classList\.remove\('craft-hotbar-active'\)/)
+  assert.match(css, /body\.craft-ui-enabled\.craft-hotbar-active \[data-chat-flow\]\{padding-bottom:var\(--craft-hotbar-reserve,80px\)!important\}/)
+  assert.match(css, /body\[data-craft-scale="3"\]\{--craft-ui-zoom:1\.14;--craft-hotbar-reserve:92px\}/)
+})
+
 test('active goal uses a Minecraft task panel with a reserved XP footer', async () => {
   const css = await readFile(join(root, 'src/client/style.css'), 'utf8')
   const overlay = await readFile(join(root, 'src/client/components/CraftOverlay.tsx'), 'utf8')

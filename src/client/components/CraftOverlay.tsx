@@ -40,13 +40,18 @@ export function CraftOverlay({ useSessions, sessions }: OverlayProps) {
     }
     previousRunning.current = view.running
   }, [prefs.advancements, view.running])
-  if (!prefs.enabled || !list.current) return null
   const done = view.todos.filter(todo => todo.status === 'completed').length
   const activeTodo = view.todos.find(todo => todo.status === 'in_progress') ?? view.todos.find(todo => todo.status === 'pending')
   const slots = makeHotbarSlots(view)
   const selectedSlot = view.tools.length > 0 ? 0 : slots[4] ? 4 : slots.findIndex(Boolean)
   const hotbarVisible = prefs.hotbar && slots.some(Boolean) && (view.tools.length > 0 || view.pending > 0 || view.agents.some(agent => agent.running))
   const goalVisible = Boolean(view.goal && view.goal.phase !== 'complete')
+  useEffect(() => {
+    const active = Boolean(prefs.enabled && list.current && hotbarVisible)
+    document.body.classList.toggle('craft-hotbar-active', active)
+    return () => document.body.classList.remove('craft-hotbar-active')
+  }, [hotbarVisible, list.current, prefs.enabled])
+  if (!prefs.enabled || !list.current) return null
   return <div className={`craft-overlay ${hotbarVisible ? 'craft-overlay-with-hotbar' : 'craft-overlay-no-hotbar'} ${goalVisible ? 'craft-overlay-with-goal' : ''}`} aria-hidden="true" style={{ '--craft-hud-bottom': `${composerClearance.bottom}px`, '--craft-composer-left': `${composerClearance.left}px`, '--craft-composer-right': `${composerClearance.right}px` } as CSSProperties}>
     {prefs.atmosphere && <div className="craft-particles">{particles.map((p, i) => <i key={i} style={{ left: p.left, animationDelay: p.delay, animationDuration: p.duration }} />)}</div>}
     {prefs.equipment && (view.model || view.reasoning) && <div className={`craft-equipment ${view.reasoning ? 'craft-enchanted' : ''}`}><ItemIcon item="helmet" /><span><small>{view.provider ?? 'MODEL EQUIPMENT'}</small><b>{view.model ?? 'Unknown model'}</b>{view.reasoning && <em>✦ {view.reasoning} enchantment</em>}</span></div>}
@@ -64,25 +69,30 @@ function useComposerClearance(): { bottom: number, left: number, right: number }
   const [clearance, setClearance] = useState({ bottom: 12, left: 12, right: 12 })
   useEffect(() => {
     let composer: Element | null = null
+    let composerSeat: Element | null = null
     let resizeObserver: ResizeObserver | undefined
     const update = () => {
-      const next = document.querySelector('[data-composer-card]')
-      if (next !== composer) {
+      const nextComposer = document.querySelector('[data-composer-card]')
+      const nextSeat = document.querySelector('[data-composer-seat]')
+      if (nextComposer !== composer || nextSeat !== composerSeat) {
         resizeObserver?.disconnect()
-        composer = next
-        if (composer && typeof ResizeObserver !== 'undefined') {
+        composer = nextComposer
+        composerSeat = nextSeat
+        if ((composer || composerSeat) && typeof ResizeObserver !== 'undefined') {
           resizeObserver = new ResizeObserver(update)
-          resizeObserver.observe(composer)
+          if (composer) resizeObserver.observe(composer)
+          if (composerSeat && composerSeat !== composer) resizeObserver.observe(composerSeat)
         }
       }
-      const rect = composer?.getBoundingClientRect()
+      const composerRect = composer?.getBoundingClientRect()
+      const seatRect = composerSeat?.getBoundingClientRect()
       const zoom = Math.max(.5, Number.parseFloat(getComputedStyle(document.body).getPropertyValue('--craft-ui-zoom')) || 1)
-      const top = rect?.top
+      const top = seatRect?.top ?? composerRect?.top
       const value = typeof top === 'number' && top > window.innerHeight * .55
         ? Math.max(12, Math.round((window.innerHeight - top + 12) / zoom))
         : 12
-      const left = rect ? Math.max(12, Math.round((rect.left + 12) / zoom)) : 12
-      const right = rect ? Math.max(12, Math.round((window.innerWidth - rect.right + 12) / zoom)) : 12
+      const left = composerRect ? Math.max(12, Math.round((composerRect.left + 12) / zoom)) : 12
+      const right = composerRect ? Math.max(12, Math.round((window.innerWidth - composerRect.right + 12) / zoom)) : 12
       setClearance(current => current.bottom === value && current.left === left && current.right === right ? current : { bottom: value, left, right })
     }
     const mutationObserver = new MutationObserver(update)
