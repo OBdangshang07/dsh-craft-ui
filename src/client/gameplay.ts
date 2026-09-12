@@ -21,6 +21,20 @@ type Summary = { id: string, displayTitle?: string, running?: boolean, projectio
 export type SessionListLike = { current?: string, byId: Record<string, Summary>, subagentsByParent?: Record<string, { entries?: unknown[] }> }
 export type ConversationLike = { running?: boolean, runningCalls?: Array<{ callId?: string, name?: string }>, pending?: unknown[], nodes?: unknown[] }
 
+/** Normalize the split Session + Chat contracts introduced in DSH 0.1.5. */
+export function normalizeConversation(
+  session: { running?: boolean },
+  chat: { legacy?: { runningCalls?: readonly { callId?: string, name?: string }[], nodes?: readonly unknown[] } },
+  hasPendingInteraction: boolean,
+): ConversationLike {
+  return {
+    running: session.running,
+    runningCalls: chat.legacy?.runningCalls ? [...chat.legacy.runningCalls] : [],
+    pending: hasPendingInteraction ? [{}] : [],
+    nodes: chat.legacy?.nodes ? [...chat.legacy.nodes] : [],
+  }
+}
+
 export function projectGameplay(list: SessionListLike, conversation?: ConversationLike): GameplayView {
   const current = list.current
   const summary = current ? list.byId[current] : undefined

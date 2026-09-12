@@ -8,7 +8,7 @@ import { createResourcePackBridge } from './resource.ts'
 import { installUiSounds } from './sound.ts'
 import CSS from './generated-styles.ts'
 
-export const inject = ['slots', 'theme', 'connection']
+export const inject = ['slots', 'theme', 'connection', 'sessions', 'uiSession', 'uiConversation']
 
 type ThemeService = {
   register: (definition: { id: string, colorScheme: 'light' | 'dark', tokens: Record<string, string> }) => () => void
@@ -21,6 +21,8 @@ export function apply(ctx: any): void {
   const theme = (ctx.get?.('theme') ?? ctx.theme) as ThemeService | undefined
   const connection = ctx.get?.('connection') ?? ctx.connection
   const sessions = ctx.get?.('sessions') ?? ctx.sessions
+  const uiSession = ctx.get?.('uiSession') ?? ctx.uiSession
+  const uiConversation = ctx.get?.('uiConversation') ?? ctx.uiConversation
   const resource = connection ? createResourcePackBridge(connection) : undefined
   if (!slots) return
   let themesReady = false
@@ -118,7 +120,7 @@ export function apply(ctx: any): void {
 
   ctx.effect(() => slots.inject('shell.overlay', () => slots.register(
     { name: 'shell.overlay', id: 'craft-ui-overlay', order: 900 },
-    (props: any) => <CraftOverlay {...props} sessions={sessions} />,
+    (props: any) => <CraftOverlay {...props} sessions={sessions} uiSession={uiSession} uiConversation={uiConversation} />,
   )), 'craft-ui: gameplay overlay')
 
   if (resource?.isLoopback) ctx.effect(() => {

@@ -30,7 +30,7 @@
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.2.1.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.2.2.tgz
 ```
 
 该插件是一个 DSH Host + Client 组合包。`cordis.patch.yml` 会插入稳定的 bundle 层；客户端使用 Harness 已公开的主题、插槽、连接、会话和对话服务。
@@ -71,7 +71,7 @@ dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.2.1.tgz
 
 ## 兼容性
 
-当前版本已针对 DeepSeek Harness `0.1.0-rc.8` 进行 Canary 测试。集成契约请参阅 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界请参阅 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
+当前版本已针对 DeepSeek Harness `0.1.5-rc.1` 进行 Canary 测试。集成契约请参阅 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界请参阅 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
 
 ## 验证
 

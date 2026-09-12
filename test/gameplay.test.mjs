@@ -1,6 +1,18 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { projectGameplay } from '../lib/client-gameplay.js'
+import { normalizeConversation, projectGameplay } from '../lib/client-gameplay.js'
+
+test('adapts DSH 0.1.5 Session and Chat snapshots without losing gameplay state', () => {
+  const conversation = normalizeConversation(
+    { running: true, queue: [{ id: 'queued-1' }] },
+    { legacy: { runningCalls: [{ callId: 'c1', name: 'exec_command' }], nodes: [{ kind: 'assistant', requestConfig: { model: 'deepseek-chat' } }] } },
+    true,
+  )
+  assert.equal(conversation.running, true)
+  assert.deepEqual(conversation.runningCalls, [{ callId: 'c1', name: 'exec_command' }])
+  assert.equal(conversation.nodes[0].requestConfig.model, 'deepseek-chat')
+  assert.equal(conversation.pending.length, 1)
+})
 
 test('projects real Harness session and projection fields into gameplay state', () => {
   const view = projectGameplay({

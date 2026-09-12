@@ -1,26 +1,51 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
 import { ItemIcon } from './ItemIcon.tsx'
 import { usePreferences } from '../store.ts'
-import { projectGameplay, type ConversationLike, type SessionListLike } from '../gameplay.ts'
+import { normalizeConversation, projectGameplay, type SessionListLike } from '../gameplay.ts'
 import { makeHotbarSlots, shortTool, toolItem } from '../hotbar.ts'
 import { playAdvancementSound } from '../sound.ts'
 
-type ObservableConversation = { getSnapshot(): ConversationLike, subscribe(listener: () => void): () => void }
-type SessionsFace = { binding(id: string): { session: ObservableConversation } | undefined }
-type OverlayProps = { useSessions: <T>(selector: (state: SessionListLike) => T) => T, sessions?: SessionsFace }
-const EMPTY_CONVERSATION: ConversationLike = { running: false, runningCalls: [], pending: [], nodes: [] }
+type ObservableSnapshot<T> = { getSnapshot(): T, subscribe(listener: () => void): () => void }
+type SessionSnapshot = { running?: boolean, queue?: readonly unknown[], pendingSubmissions?: readonly unknown[] }
+type ChatSnapshot = { legacy?: { nodes?: readonly unknown[], runningCalls?: readonly { callId?: string, name?: string }[] } }
+type SessionBinding = { session: ObservableSnapshot<SessionSnapshot> }
+type SessionsFace = { binding(id: string): SessionBinding | undefined }
+type UiConversationFace = { binding(source: SessionBinding): { target(target: string): ObservableSnapshot<ChatSnapshot | undefined> } }
+type UiSessionFace = { pendingInteractions: ObservableSnapshot<ReadonlyMap<string, unknown>> }
+type OverlayProps = {
+  useSessions: <T>(selector: (state: SessionListLike) => T) => T
+  sessions?: SessionsFace
+  uiConversation?: UiConversationFace
+  uiSession?: UiSessionFace
+}
+const EMPTY_SESSION: SessionSnapshot = { running: false, queue: [], pendingSubmissions: [] }
+const EMPTY_CHAT: ChatSnapshot = { legacy: { nodes: [], runningCalls: [] } }
+const EMPTY_INTERACTIONS: ReadonlyMap<string, unknown> = new Map()
 const emptySubscribe = () => () => {}
 
-export function CraftOverlay({ useSessions, sessions }: OverlayProps) {
+export function CraftOverlay({ useSessions, sessions, uiConversation, uiSession }: OverlayProps) {
   const prefs = usePreferences()
   const composerClearance = useComposerClearance()
   const list = useSessions(row => row)
   const binding = list.current ? sessions?.binding(list.current) : undefined
-  const conversation = useSyncExternalStore(
+  const session = useSyncExternalStore(
     binding ? listener => binding.session.subscribe(listener) : emptySubscribe,
-    binding ? () => binding.session.getSnapshot() : () => EMPTY_CONVERSATION,
-    () => EMPTY_CONVERSATION,
+    binding ? () => binding.session.getSnapshot() : () => EMPTY_SESSION,
+    () => EMPTY_SESSION,
   )
+  const chatBinding = binding && uiConversation ? uiConversation.binding(binding) : undefined
+  const chatTarget = chatBinding?.target('chat')
+  const chat = useSyncExternalStore(
+    chatTarget ? listener => chatTarget.subscribe(listener) : emptySubscribe,
+    chatTarget ? () => chatTarget.getSnapshot() ?? EMPTY_CHAT : () => EMPTY_CHAT,
+    () => EMPTY_CHAT,
+  )
+  const pendingInteractions = useSyncExternalStore(
+    uiSession ? listener => uiSession.pendingInteractions.subscribe(listener) : emptySubscribe,
+    uiSession ? () => uiSession.pendingInteractions.getSnapshot() : () => EMPTY_INTERACTIONS,
+    () => EMPTY_INTERACTIONS,
+  )
+  const conversation = normalizeConversation(session, chat, Boolean(list.current && pendingInteractions.has(list.current)))
   const view = projectGameplay(list, conversation)
   const level = Math.round(view.context.ratio * 100)
   const contextAvailable = view.context.used !== undefined && view.context.capacity !== undefined

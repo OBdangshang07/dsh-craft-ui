@@ -2,14 +2,14 @@
 
 ## Tested baseline
 
-- DeepSeek Harness: `0.1.0-rc.8`
+- DeepSeek Harness: `0.1.5-rc.1`
 - Node.js: 22+
 - Client: Chromium/Edge through the Harness web app
 - Package form: Host + Client DSH plugin
 
 ## Stable integration points
 
-The plugin registers themes through the Harness theme service and mounts controls through `sidebar.footer.action` and `shell.overlay`. Gameplay data is read from the active session binding and its observable conversation snapshot. It recognizes native interaction surfaces through the documented data attributes `data-approval-key`, `data-question-key`, and `data-plan-review-key`.
+The plugin registers themes through the Harness theme service and mounts controls through `sidebar.footer.action` and `shell.overlay`. Session lifecycle comes from the active `sessions` binding, Chat nodes and running calls come from the `uiConversation` `chat` target, and pending interactions come from `uiSession`. It recognizes native interaction surfaces through the documented data attributes `data-approval-key`, `data-question-key`, and `data-plan-review-key`.
 
 It does not replace message submission, approval decisions, questions, plan review, tool execution, goals, or subagent orchestration. When a projection is absent, its associated HUD element is hidden or marked unavailable.
 
@@ -20,11 +20,11 @@ It does not replace message submission, approval decisions, questions, plan revi
 | `contextPressure.projectedTokens/contextWindow` | XP bar |
 | latest assistant request provenance/config | model equipment |
 | reasoning effort/thinking | enchantment |
-| `runningCalls` | hotbar and tool toast |
+| Chat target `legacy.runningCalls` | hotbar and tool toast |
 | todos and plan projections | quest log |
 | goal rounds | Boss Bar |
 | subagent catalog | companion list |
-| pending interactions | approval indicator |
+| `uiSession.pendingInteractions` | approval indicator |
 
 ## Degradation rules
 

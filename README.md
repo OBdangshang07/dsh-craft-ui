@@ -30,7 +30,7 @@ Requires Node.js 22 or newer and a compatible DeepSeek Harness build.
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.2.1.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.2.2.tgz
 ```
 
 The plugin is a DSH Host + Client combo package. `cordis.patch.yml` inserts its stable bundle layer; the client uses documented theme, slot, connection, session, and conversation services.
@@ -71,7 +71,7 @@ The client embeds `Fusion Pixel 10px Monospaced zh-Hans` as WOFF2 at build time,
 
 ## Compatibility
 
-The release has been canary-tested against DeepSeek Harness `0.1.0-rc.8`. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
+The release has been canary-tested against DeepSeek Harness `0.1.5-rc.1`. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
 
 ## Verification
 
