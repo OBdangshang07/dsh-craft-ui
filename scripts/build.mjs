@@ -22,6 +22,8 @@ await build({
 })
 
 let css = await readFile(join(root, 'src', 'client', 'style.css'), 'utf8')
+css += '\n' + await readFile(join(root, 'src', 'client', 'workbench.css'), 'utf8')
+css += '\n' + await readFile(join(root, 'src', 'client', 'reasoning.css'), 'utf8')
 const embeddedAssets = {
   ASSET_BUTTON_NORMAL: { path: join(generated, 'button-normal.png'), mime: 'image/png' },
   ASSET_BUTTON_HOVER: { path: join(generated, 'button-hover.png'), mime: 'image/png' },
@@ -83,3 +85,7 @@ await build({
   target: ['es2022'],
 })
 console.log(`built ${packageJson.name}: ${wrapped.length} client bytes`)
+await build({ entryPoints: [join(root, 'src', 'workbench.ts')], outfile: join(lib, 'workbench.js'), bundle: true, format: 'esm', platform: 'neutral', target: ['es2022'] })
+await build({ entryPoints: [join(root, 'src', 'host', 'notebook.ts')], outfile: join(lib, 'notebook.js'), bundle: true, format: 'esm', platform: 'node', target: ['node22'] })
+await build({ entryPoints: [join(root, 'src', 'client', 'workbench', 'bridge.ts')], outfile: join(lib, 'notebook-bridge.js'), bundle: true, format: 'esm', platform: 'neutral', target: ['es2022'] })
+await build({ entryPoints: [join(root, 'src', 'client', 'reasoning.ts')], outfile: join(lib, 'client-reasoning.js'), bundle: true, format: 'esm', platform: 'neutral', target: ['es2022'] })

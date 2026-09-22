@@ -26,7 +26,10 @@ for (let offset = 0; offset + 512 <= tar.length;) {
 const allowed = new Set([
   'package/LICENSE', 'package/README.md', 'package/README.zh-CN.md', 'package/THIRD_PARTY_NOTICES.md', 'package/cordis.patch.yml', 'package/package.json',
   'package/docs/ASSET_POLICY.md', 'package/docs/COMPATIBILITY.md', 'package/docs/RELEASE_CHECKLIST.md',
+  'package/docs/ROADMAP-0.4.zh-CN.md',
   'package/lib/index.js', 'package/lib/client.js', 'package/lib/client-gameplay.js', 'package/lib/client-hotbar.js',
+  'package/lib/workbench.js', 'package/lib/notebook.js', 'package/lib/notebook-bridge.js',
+  'package/lib/client-reasoning.js',
   'package/assets/fonts/fusion-pixel-10px-monospaced-zh-hans.woff2', 'package/assets/fonts/OFL.txt',
   'package/assets/fonts/LICENSES/ark-pixel/OFL.txt', 'package/assets/fonts/LICENSES/boutique-bitmap-9x9/OFL.txt',
   'package/assets/fonts/LICENSES/galmuri/LICENSE.txt',

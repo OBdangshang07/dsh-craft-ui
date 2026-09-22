@@ -5,6 +5,8 @@ const root = resolve(import.meta.dirname, '..')
 const out = join(root, '.generated', 'preview')
 await mkdir(out, { recursive: true })
 let css = await readFile(join(root, 'src', 'client', 'style.css'), 'utf8')
+css += '\n' + await readFile(join(root, 'src', 'client', 'workbench.css'), 'utf8')
+css += '\n' + await readFile(join(root, 'src', 'client', 'reasoning.css'), 'utf8')
 const embeddedAssets = {
   ASSET_BUTTON_NORMAL: { path: join(root, 'assets', 'generated', 'button-normal.png'), mime: 'image/png' },
   ASSET_BUTTON_HOVER: { path: join(root, 'assets', 'generated', 'button-hover.png'), mime: 'image/png' },

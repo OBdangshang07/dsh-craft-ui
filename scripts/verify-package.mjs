@@ -7,6 +7,8 @@ const fontFile = 'assets/fonts/fusion-pixel-10px-monospaced-zh-hans.woff2'
 const fontSha256 = '26f51314318daa30553e33979d6f1dae977dbe127d25ba14c654ac4c27e0b6f7'
 const required = [
   'lib/index.js', 'lib/client.js', 'lib/client-gameplay.js', 'lib/client-hotbar.js', 'assets/generated/manifest.json',
+  'lib/workbench.js', 'lib/notebook.js', 'lib/notebook-bridge.js', 'README.zh-CN.md',
+  'lib/client-reasoning.js',
   fontFile, 'assets/fonts/OFL.txt', 'assets/fonts/LICENSES/ark-pixel/OFL.txt',
   'assets/fonts/LICENSES/boutique-bitmap-9x9/OFL.txt', 'assets/fonts/LICENSES/galmuri/LICENSE.txt',
   'cordis.patch.yml', 'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md',

@@ -6,6 +6,8 @@ import { DAY_THEME, DEEPSLATE_THEME } from './theme.ts'
 import { getPreferences, subscribePreferences } from './store.ts'
 import { createResourcePackBridge } from './resource.ts'
 import { installUiSounds } from './sound.ts'
+import { installWorkbench } from './workbench/index.tsx'
+import { installReasoningControl } from './components/ReasoningControl.tsx'
 import CSS from './generated-styles.ts'
 
 export const inject = ['slots', 'theme', 'connection', 'sessions', 'uiSession', 'uiConversation']
@@ -25,6 +27,8 @@ export function apply(ctx: any): void {
   const uiConversation = ctx.get?.('uiConversation') ?? ctx.uiConversation
   const resource = connection ? createResourcePackBridge(connection) : undefined
   if (!slots) return
+  installReasoningControl(ctx)
+  if (connection && uiConversation) installWorkbench(ctx, connection, uiConversation)
   let themesReady = false
   let previousTheme: string | undefined
 

@@ -6,7 +6,7 @@ import { setPreferences, usePreferences } from '../store.ts'
 import type { CraftPreferences } from '../types.ts'
 import type { ResourcePackBridge, ResourcePackStatus } from '../resource.ts'
 
-type OptionsPage = 'options' | 'gameplay' | 'assets'
+type OptionsPage = 'options' | 'gameplay' | 'assets' | 'workbench'
 
 export function CraftPanel({ onClose, resource }: { onClose: () => void, resource?: ResourcePackBridge }) {
   const prefs = usePreferences()
@@ -66,10 +66,16 @@ export function CraftPanel({ onClose, resource }: { onClose: () => void, resourc
   const back = () => page === 'options' ? onClose() : setPage('options')
   return createPortal(<div className="craft-panel-shade" role="presentation">
     <NineSlice kind="panel" className={`craft-control-panel craft-options-${page}`} role="dialog" aria-modal="true" aria-label="Craft UI settings">
-      <header><h2>{page === 'options' ? '选项' : page === 'gameplay' ? 'HUD 与玩法设置' : '素材与资源包'}</h2></header>
+      <header><h2>{page === 'options' ? '选项' : page === 'gameplay' ? 'HUD 与玩法设置' : page === 'workbench' ? '地图与书签' : '素材与资源包'}</h2></header>
       <section>
         {page === 'options' && <OptionsHome prefs={prefs} open={setPage} resourceStatus={resourceStatus} />}
         {page === 'gameplay' && <GameplayOptions prefs={prefs} />}
+        {page === 'workbench' && <div className="craft-options-grid">
+          <ToggleOption label="对话图片阅览条" value={prefs.imageJournal} onChange={imageJournal => setPreferences({ imageJournal })} />
+          <ToggleOption label="图片对比与标注" value={prefs.imageWorkbench} onChange={imageWorkbench => setPreferences({ imageWorkbench })} />
+          <ToggleOption label="消息书签与决定卡片" value={prefs.bookmarks} onChange={bookmarks => setPreferences({ bookmarks })} />
+          <p className="craft-options-note craft-options-note-wide">图片保持原比例与读取时版本。标注和书签只加入草稿，不自动发送；禁用不会删除保存的数据。</p>
+        </div>}
         {page === 'assets' && <AssetsOptions resource={resource} resourceStatus={resourceStatus} archivePath={archivePath} setArchivePath={setArchivePath} resourceBusy={resourceBusy} resourceMessage={resourceMessage} runResource={runResource} />}
       </section>
       <footer>
@@ -85,8 +91,10 @@ function OptionsHome({ prefs, open, resourceStatus }: { prefs: CraftPreferences,
     <CycleOption label="世界主题" value={prefs.theme === 'craft-day' ? '主世界日间' : '深板岩夜间'} onClick={() => setPreferences({ theme: prefs.theme === 'craft-day' ? 'craft-deepslate' : 'craft-day' })} />
     <CycleOption label="界面尺寸" value={prefs.scale === 1 ? '紧凑' : prefs.scale === 2 ? '标准' : '大号'} onClick={() => setPreferences({ scale: (prefs.scale === 3 ? 1 : prefs.scale + 1) as 1 | 2 | 3 })} />
     <CycleOption label="动效等级" value={prefs.motion === 'full' ? '完整' : prefs.motion === 'reduced' ? '精简' : '关闭'} onClick={() => setPreferences({ motion: nextMotion(prefs.motion) })} />
+    <CycleOption label="推理等级控件" value={prefs.reasoningControl === 'menu' ? '旧版菜单' : '滑动条'} onClick={() => setPreferences({ reasoningControl: prefs.reasoningControl === 'menu' ? 'slider' : 'menu' })} />
     <button className="craft-menu-link" onClick={() => open('gameplay')}>HUD 与玩法设置…</button>
     <button className="craft-menu-link" onClick={() => open('assets')}>素材与资源包…</button>
+    <button className="craft-menu-link" onClick={() => open('workbench')}>地图与书签…</button>
     <p className="craft-options-note">界面尺寸会同步缩放 HUD。系统的“减少动态效果”设置始终优先。</p>
     <p className="craft-options-note">{resourceStatus?.capabilities.items ? `已启用 ${resourceStatus.files} 个本地物品贴图` : '当前使用原创 Pixel UI Kit'}</p>
   </div>

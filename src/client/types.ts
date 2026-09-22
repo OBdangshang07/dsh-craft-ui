@@ -14,6 +14,10 @@ export interface CraftPreferences {
   equipment: boolean
   questBook: boolean
   agentList: boolean
+  imageJournal: boolean
+  imageWorkbench: boolean
+  bookmarks: boolean
+  reasoningControl: 'slider' | 'menu'
 }
 
 export const DEFAULT_PREFERENCES: CraftPreferences = {
@@ -29,4 +33,8 @@ export const DEFAULT_PREFERENCES: CraftPreferences = {
   equipment: true,
   questBook: true,
   agentList: true,
+  imageJournal: true,
+  imageWorkbench: true,
+  bookmarks: true,
+  reasoningControl: 'slider',
 }

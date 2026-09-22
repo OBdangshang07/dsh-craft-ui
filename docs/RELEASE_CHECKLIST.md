@@ -15,3 +15,13 @@
 - [ ] Idle or passive historical sessions do not leave a nine-slot hotbar covering message actions; active HUD does not overlap the composer.
 - [ ] Keyboard focus and reduced-motion behavior are verified.
 - [ ] Version, compatibility baseline, notices, and screenshots are current.
+- [ ] Image journal restores the upstream read-image renderer when disabled; no second owner for `tool.call.images` or Chat grouping.
+- [ ] Real persisted attachments, turn-tail gallery, source lookup, annotation writes and reload pass in the isolated seeded DSH profile.
+- [ ] Side-by-side/wipe/zoom, region coordinates, unsaved-change prompts and derived PNG export work without changing source images.
+- [ ] Draft feedback retains existing text/references and never sends a model request.
+- [ ] Notebook revision conflicts, damaged schema/history, crash locks and storage failures preserve prior records; source identity is verified.
+- [ ] Same-Session backup import previews and skips existing IDs; private-data and revision-loss caveats are visible.
+- [ ] Both README languages ship in the package. 0.5/0.6 plans are not advertised as implemented features.
+- [ ] Default reasoning slider uses real model metadata; pointer preview never writes until release, keyboard selection persists, reset follows model defaults, and stale gestures/failures preserve authoritative selection.
+- [ ] Legacy reasoning preference survives reload, unregisters the custom slot and restores the genuine native menu; disabling Craft UI does the same.
+- [ ] Compact reasoning panel puts an explicit bordered model-switch button first; long model names preserve the action, keyboard model switching works, and four/six-level layouts fit narrow screens.

@@ -84,8 +84,8 @@ await withCanaryBrowser(logPath, async browser => {
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('[role="menu"]')).borderRadius`), '0px')
   await capture('native-permissions-fixed')
   await key(call, 'Escape', 'Escape', 27)
-  await evaluate(`document.querySelector('button[aria-label^="选择模型"]')?.click()`)
-  await waitFor(`!!document.querySelector('[role="menu"]')`)
+    await evaluate(`document.querySelector('button[aria-label^="选择模型"]')?.click()`)
+    await waitFor(`!!document.querySelector('.craft-reasoning-popup,[role="menu"]')`)
   await capture('native-model-menu-fixed')
   await key(call, 'Escape', 'Escape', 27)
 

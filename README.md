@@ -22,6 +22,20 @@ The published package is self-contained: it includes the original MIT-licensed p
 - Minecraft-styled settings, approval, question, and plan-review surfaces without replacing native actions or risk copy.
 - Java Edition-style Options navigation: centered two-column option buttons, dedicated HUD and resource-pack subpages, and a bottom Done/Back action instead of desktop-style tabs and dropdowns.
 
+## 0.4.0: Maps & Quills
+
+- **Reasoning slider (default)**: Minecraft-style discrete stops, a square stone thumb, green track, current effort and model-default reset. Levels come exclusively from the selected model's adapter. Drag to preview and release to apply, or use stop labels, arrows and Home/End. Only the next request is affected. The compact panel puts an explicit **Model / Change ▾** button first; long model names never displace the action. **Craft UI → 选项 → 推理等级控件** switches to the persisted **旧版菜单** (legacy menu) preference. This removes the replacement slot and restores DSH's original control; disabling the theme restores it too.
+- **Inline read images**: map-framed thumbnails for successful `read_image` results and a turn-tail gallery. Uses the attachment at read time, with its aspect ratio and colors intact.
+- **Map workbench**: fit/25–400% zoom, panning, synchronized side-by-side comparison, same-size wipe comparison, and optional nearest-neighbor pixel mode.
+- **Region feedback**: rectangles, percentage coordinates, notes and persistent annotations. Append feedback to the existing draft without sending or reattaching anything. Download a separate derived PNG with a region overlay (up to 4 MP / 4096 pixels on the longest side); never overwrite the source.
+- **Session notebook**: bookmark messages or excerpts as constraints, decisions or open questions; add tags and notes, retain the latest 20 revisions, mark replacements, read source messages, search, delete, and export/import backups.
+
+Click a thumbnail to open the workbench. The book icon beside the Session title opens the notebook; assistant replies also have a bookmark action. Disable each module under **Craft UI → 地图与书签**. Java-inspired buttons, map frames, book icons and both themes are used throughout; no new permanent bottom HUD is added.
+
+Notes live in the current DSH profile's `craft-notebooks/`, isolated by Session identity, with a 300-entry / 4 MiB limit per notebook. Revision conflicts require reload rather than silently overwriting another window. Deleting a bookmark or clearing assets never deletes a conversation. JSON import accepts only the same Session, previews changes and verifies sources; existing IDs are skipped and old revisions/replacement links are not restored. **Exported backups contain message excerpts; treat them as private.**
+
+Scope: native Chat grouping and collapsed tool groups remain owned by DSH, with a visible image summary at turn end. Source text is fetched by event inside the notebook rather than force-scrolling the conversation. Load older messages in Chat before bookmarking them. Forked Sessions do not inherit notes. Arbitrary terminal paths and remote URLs are not treated as images. No extra model requests are made. Exported PNGs contain the region overlay; send the text note via the draft. The 0.5/0.6 evidence, artifact-history, handoff and file-restore roadmap is not implemented.
+
 ## Install and develop
 
 Requires Node.js 22 or newer and a compatible DeepSeek Harness build.
@@ -30,7 +44,7 @@ Requires Node.js 22 or newer and a compatible DeepSeek Harness build.
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.3.1.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.0.tgz
 ```
 
 The plugin is a DSH Host + Client combo package. `cordis.patch.yml` inserts its stable bundle layer; the client uses documented theme, slot, connection, session, and conversation services.
@@ -71,7 +85,7 @@ The client embeds `Fusion Pixel 10px Monospaced zh-Hans` as WOFF2 at build time,
 
 ## Compatibility
 
-Version `0.3.1` targets DeepSeek Harness `0.1.7-alpha.1`, available on the upstream `alpha` channel (`npm install -g @deepseek-ai/dsh@0.1.7-alpha.1`). It adapts main-view Session ownership, unified Session status, subagent catalogs, model metadata, and authenticated resource routes. The settings screen stays above the redesigned sidebar at every width. Native switches, checkboxes, radio inputs, segmented tabs, menus, selects, and the font-size stepper have dedicated pixel styling, including selected, disabled, invalid, and reduced-motion states. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
+Version `0.4.0` targets DeepSeek Harness `0.1.7-alpha.1`, available on the upstream `alpha` channel (`npm install -g @deepseek-ai/dsh@0.1.7-alpha.1`). It adapts main-view Session ownership, unified Session status, subagent catalogs, model metadata, and authenticated resource routes. The settings screen stays above the redesigned sidebar at every width. Native switches, checkboxes, radio inputs, segmented tabs, menus, selects, and the font-size stepper have dedicated pixel styling, including selected, disabled, invalid, and reduced-motion states. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
 
 ## Verification
 

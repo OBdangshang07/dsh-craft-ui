@@ -39,6 +39,7 @@ export async function withCanaryBrowser(logPath, run) {
     socket.addEventListener('message', event => {
       const message = JSON.parse(event.data)
       if (message.method === 'Runtime.exceptionThrown') errors.push(message.params.exceptionDetails.text)
+      if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'error') errors.push(message.params.args.map(arg => arg.value ?? arg.description ?? '').join(' '))
       const waiter = pending.get(message.id)
       if (!waiter) return
       pending.delete(message.id)
@@ -68,10 +69,11 @@ export async function withCanaryBrowser(logPath, run) {
       if (!clicked) throw new Error(`Missing control: ${text}`)
       await delay(180)
     }
-    const capture = async name => {
+    const capture = async (name, selector) => {
       const out = join(generated, 'native-controls')
       await mkdir(out, { recursive: true })
-      const shot = await call('Page.captureScreenshot', { format: 'png' })
+      const clip = selector ? await evaluate(`(()=>{const r=document.querySelector(${JSON.stringify(selector)}).getBoundingClientRect();return{x:Math.max(0,r.x-2),y:Math.max(0,r.y-2),width:Math.min(innerWidth-Math.max(0,r.x-2),r.width+8),height:Math.min(innerHeight-Math.max(0,r.y-2),r.height+8),scale:1}})()`) : undefined
+      const shot = await call('Page.captureScreenshot', { format: 'png', ...(clip ? { clip } : {}) })
       await writeFile(join(out, `${name}.png`), Buffer.from(shot.data, 'base64'))
     }
     await call('Page.enable')
