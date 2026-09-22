@@ -35,12 +35,12 @@ interface ResourceTheme { active: boolean, sourceName?: string, assets: Record<s
 
 export function createResourcePackBridge(connection: ConnectionLike): ResourcePackBridge {
   const call = async (endpoint: string, payload: unknown): Promise<ResourcePackStatus> => {
-    const result = await connection.rpc.call('/craft-ui', endpoint, payload)
+    const result = await connection.rpc.call('/api', `craft-ui/${endpoint}`, payload)
     if (!result.ok) throw new Error(result.error?.message || 'Craft UI 资源操作失败')
     return result.value as ResourcePackStatus
   }
   const refreshTheme = async (): Promise<void> => {
-    const result = await connection.rpc.call('/craft-ui', 'theme', {})
+    const result = await connection.rpc.call('/api', 'craft-ui/theme', {})
     if (!result.ok) throw new Error(result.error?.message || '无法读取资源主题')
     applyResourceTheme(result.value as ResourceTheme)
   }

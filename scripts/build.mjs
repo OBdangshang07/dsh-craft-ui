@@ -54,7 +54,7 @@ const result = await build({
   format: 'cjs',
   platform: 'browser',
   target: ['chrome110'],
-  external: ['react', 'react/jsx-runtime'],
+  external: ['react', 'react/jsx-runtime', 'react-dom'],
   plugins: [stylePlugin],
   write: false,
   sourcemap: false,

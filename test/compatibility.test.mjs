@@ -21,13 +21,7 @@ test('normalizes the split Session, Chat, and pending-interaction feeds', async 
   const source = await readFile(join(root, 'src/client/components/CraftOverlay.tsx'), 'utf8')
   assert.match(source, /uiConversation\.binding\(binding\)/)
   assert.match(source, /chatBinding\?\.target\('chat'\)/)
-  assert.match(source, /uiSession\.pendingInteractions\.subscribe/)
-  assert.match(source, /normalizeConversation\(session, chat, Boolean/)
-})
-
-test('registers the Host RPC route inside the current webServer fiber', async () => {
-  const source = await readFile(join(root, 'src/index.ts'), 'utf8')
-  assert.match(source, /ctx\.inject\(\['webServer'\], webCtx =>/)
-  assert.match(source, /webCtx\.connection\.rpc\.handle\('\/craft-ui'/)
-  assert.doesNotMatch(source, /authority: 'loopback'/)
+  assert.match(source, /uiSession\?\.sessionStatus/)
+  assert.match(source, /status\?\.pendingInteraction/)
+  assert.match(source, /normalizeSessionList\(useSessions/)
 })

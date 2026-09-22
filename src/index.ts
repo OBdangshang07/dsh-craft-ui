@@ -36,50 +36,61 @@ export const Config: Schema<Config> = Schema.object({
   dshHome: Schema.string().description('Optional Harness home override used for the local resource cache.'),
 }).description('DSH Craft UI host defaults. User presentation preferences remain client-local.')
 
-// The current connection service registers host routes through the owning
-// Fiber, so the web server must be present in that Fiber's injection map.
+// Exact Fetch routes use the shared authenticated /api carrier. Custom RPC
+// channels in 0.1.7 lose the caller's webServer injection through Cordis tracing.
 export const inject = ['connection']
 
 interface RpcContext {
   connection: {
-    rpc: {
-      handle(channel: string, handler: (endpoint: string, payload: unknown, signal: AbortSignal) => Promise<unknown>): unknown
+    fetch: {
+      register(route: { path: string, methods: string[], requestBody: 'buffered', fetch: (request: Request) => Promise<Response> }): unknown
     }
   }
-  inject(dependencies: string[], callback: (ctx: RpcContext) => void): unknown
 }
 
-/** Loopback-only host bridge for user-owned Minecraft archives. */
+/** Authenticated host bridge for user-owned Minecraft archives. */
 export function apply(ctx: RpcContext, config: Config): void {
   const root = resolveResourcePackRoot(config.dshHome)
-  ctx.inject(['webServer'], webCtx => {
-    webCtx.connection.rpc.handle('/craft-ui', async (endpoint, payload) => {
-      try {
-        if (endpoint === 'status') return { ok: true, value: await readResourcePackStatus(root) }
-        if (endpoint === 'theme') return { ok: true, value: await readResourceTheme(root) }
-        if (endpoint === 'import') {
-          if (!config.allowLocalOfficialAssets) return failure('forbidden', 'Host 已禁用本地 Minecraft 素材导入')
-          const path = typeof payload === 'object' && payload !== null && 'path' in payload
-            ? (payload as { path?: unknown }).path
-            : undefined
-          if (typeof path !== 'string') return failure('bad-request', '资源包路径无效')
-          return { ok: true, value: await importResourcePack(path, root) }
-        }
-        if (endpoint === 'import-items') {
-          if (!config.allowLocalOfficialAssets) return failure('forbidden', 'Host 已禁用本地 Minecraft 素材导入')
-          const path = typeof payload === 'object' && payload !== null && 'path' in payload
-            ? (payload as { path?: unknown }).path
-            : undefined
-          if (typeof path !== 'string') return failure('bad-request', '物品贴图目录无效')
-          return { ok: true, value: await importLocalItemDirectory(path, root) }
-        }
-        if (endpoint === 'clear') return { ok: true, value: await clearResourcePackCache(root) }
-        return failure('not-found', '未知的 Craft UI 资源操作')
-      } catch (error) {
-        return failure('bad-request', error instanceof Error ? error.message : String(error))
+  const handle = async (endpoint: string, payload: unknown) => {
+    try {
+      if (endpoint === 'status') return { ok: true, value: await readResourcePackStatus(root) }
+      if (endpoint === 'theme') return { ok: true, value: await readResourceTheme(root) }
+      if (endpoint === 'import') {
+        if (!config.allowLocalOfficialAssets) return failure('forbidden', 'Host 已禁用本地 Minecraft 素材导入')
+        const path = typeof payload === 'object' && payload !== null && 'path' in payload
+          ? (payload as { path?: unknown }).path
+          : undefined
+        if (typeof path !== 'string') return failure('bad-request', '资源包路径无效')
+        return { ok: true, value: await importResourcePack(path, root) }
       }
+      if (endpoint === 'import-items') {
+        if (!config.allowLocalOfficialAssets) return failure('forbidden', 'Host 已禁用本地 Minecraft 素材导入')
+        const path = typeof payload === 'object' && payload !== null && 'path' in payload
+          ? (payload as { path?: unknown }).path
+          : undefined
+        if (typeof path !== 'string') return failure('bad-request', '物品贴图目录无效')
+        return { ok: true, value: await importLocalItemDirectory(path, root) }
+      }
+      if (endpoint === 'clear') return { ok: true, value: await clearResourcePackCache(root) }
+      return failure('not-found', '未知的 Craft UI 资源操作')
+    } catch (error) {
+      return failure('bad-request', error instanceof Error ? error.message : String(error))
+    }
+  }
+  for (const endpoint of ['status', 'theme', 'import', 'import-items', 'clear']) {
+    ctx.connection.fetch.register({
+      path: `/api/craft-ui/${endpoint}`,
+      methods: ['POST'],
+      requestBody: 'buffered',
+      fetch: async request => {
+        const body = await request.json().catch(() => null)
+        if (!body || body.type !== 'client-request' || typeof body.rpcId !== 'string' || !body.rpcId || body.method !== `craft-ui/${endpoint}`) {
+          return new Response('Invalid Craft UI RPC envelope', { status: 400 })
+        }
+        return Response.json({ type: 'server-response', rpcId: body.rpcId, result: await handle(endpoint, body.payload) })
+      },
     })
-  })
+  }
 }
 
 function failure(code: string, message: string) {

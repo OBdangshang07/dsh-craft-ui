@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { NineSlice } from './NineSlice.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
 import { setPreferences, usePreferences } from '../store.ts'
@@ -63,7 +64,7 @@ export function CraftPanel({ onClose, resource }: { onClose: () => void, resourc
     }
   }
   const back = () => page === 'options' ? onClose() : setPage('options')
-  return <div className="craft-panel-shade" role="presentation">
+  return createPortal(<div className="craft-panel-shade" role="presentation">
     <NineSlice kind="panel" className={`craft-control-panel craft-options-${page}`} role="dialog" aria-modal="true" aria-label="Craft UI settings">
       <header><h2>{page === 'options' ? '选项' : page === 'gameplay' ? 'HUD 与玩法设置' : '素材与资源包'}</h2></header>
       <section>
@@ -75,7 +76,7 @@ export function CraftPanel({ onClose, resource }: { onClose: () => void, resourc
         <button className="craft-done" onClick={back}>{page === 'options' ? '完成' : '返回'}</button>
       </footer>
     </NineSlice>
-  </div>
+  </div>, document.body)
 }
 
 function OptionsHome({ prefs, open, resourceStatus }: { prefs: CraftPreferences, open: (page: OptionsPage) => void, resourceStatus?: ResourcePackStatus }) {

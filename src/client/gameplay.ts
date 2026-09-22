@@ -17,9 +17,19 @@ export interface GameplayView {
   pending: number
 }
 
-type Summary = { id: string, displayTitle?: string, running?: boolean, projectionValues?: Record<string, unknown> }
+type Summary = { id: string, displayTitle?: string, running?: boolean, retainedBy?: Readonly<Record<string, number>>, projectionValues?: Record<string, unknown> }
 export type SessionListLike = { current?: string, byId: Record<string, Summary>, subagentsByParent?: Record<string, { entries?: unknown[] }> }
+export type SessionStatusLike = { running?: boolean, pendingInteraction?: unknown }
 export type ConversationLike = { running?: boolean, runningCalls?: Array<{ callId?: string, name?: string }>, pending?: unknown[], nodes?: unknown[] }
+
+/** 0.1.7 identifies the visible Session by its mainView reference owner. */
+export function normalizeSessionList(list: SessionListLike): SessionListLike {
+  const rows = Object.values(list.byId)
+  // A modern catalog with no mainView means the empty screen, not the last row.
+  const modern = rows.some(row => row.retainedBy !== undefined)
+  const current = modern ? rows.find(row => (row.retainedBy?.mainView ?? 0) > 0)?.id : list.current
+  return { ...list, current }
+}
 
 /** Normalize the split Session + Chat contracts introduced in DSH 0.1.5. */
 export function normalizeConversation(
@@ -35,7 +45,7 @@ export function normalizeConversation(
   }
 }
 
-export function projectGameplay(list: SessionListLike, conversation?: ConversationLike): GameplayView {
+export function projectGameplay(list: SessionListLike, conversation?: ConversationLike, statuses?: ReadonlyMap<string, SessionStatusLike>): GameplayView {
   const current = list.current
   const summary = current ? list.byId[current] : undefined
   const projections = summary?.projectionValues ?? {}
@@ -45,7 +55,7 @@ export function projectGameplay(list: SessionListLike, conversation?: Conversati
   const ratio = used !== undefined && capacity !== undefined && capacity > 0 ? clamp(used / capacity) : 0
   const assistant = latestAssistant(conversation?.nodes)
   const request = asRecord(assistant?.requestConfig)
-  const provenance = asRecord(assistant?.provenance)
+  const provenance = asRecord(assistant?.providerMetadata) ?? asRecord(assistant?.provenance)
   const model = stringOf(request?.model) ?? stringOf(provenance?.model)
   const provider = stringOf(request?.provider) ?? stringOf(provenance?.provider)
   const reasoning = stringOf(request?.reasoningEffort) ?? stringOf(request?.thinking)
@@ -56,10 +66,13 @@ export function projectGameplay(list: SessionListLike, conversation?: Conversati
   const goalProjection = asRecord(projections.goal)
   const goal = asRecord(goalProjection?.goal)
   const catalog = current ? list.subagentsByParent?.[current] : undefined
-  const agents = (catalog?.entries ?? []).flatMap((entry): AgentView[] => {
+  const modernCatalog = Array.isArray(projections.subagentCatalog) ? projections.subagentCatalog : undefined
+  const agents = (modernCatalog ?? catalog?.entries ?? []).flatMap((entry): AgentView[] => {
     const row = asRecord(entry)
-    if (row?.kind !== 'child' || typeof row.id !== 'string') return []
-    return [{ id: row.id, label: stringOf(row.label) ?? row.id.slice(0, 8), running: row.activity === 'running', mode: stringOf(row.mode) }]
+    if (!row || (!modernCatalog && row.kind !== 'child') || typeof row.id !== 'string') return []
+    const child = list.byId[row.id]
+    const running = statuses?.get(row.id)?.running ?? child?.running ?? (row.activity === 'running')
+    return [{ id: row.id, label: stringOf(row.label) ?? child?.displayTitle ?? row.id.slice(0, 8), running, mode: stringOf(row.mode) }]
   })
   return {
     context: { ratio, used, capacity }, model, provider, reasoning,

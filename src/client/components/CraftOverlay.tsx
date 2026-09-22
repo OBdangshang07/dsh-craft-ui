@@ -1,32 +1,39 @@
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
 import { ItemIcon } from './ItemIcon.tsx'
 import { usePreferences } from '../store.ts'
-import { normalizeConversation, projectGameplay, type SessionListLike } from '../gameplay.ts'
+import { normalizeConversation, normalizeSessionList, projectGameplay, type SessionListLike, type SessionStatusLike } from '../gameplay.ts'
 import { makeHotbarSlots, shortTool, toolItem } from '../hotbar.ts'
 import { playAdvancementSound } from '../sound.ts'
 
 type ObservableSnapshot<T> = { getSnapshot(): T, subscribe(listener: () => void): () => void }
-type SessionSnapshot = { running?: boolean, queue?: readonly unknown[], pendingSubmissions?: readonly unknown[] }
+type SessionSnapshot = { running?: boolean }
 type ChatSnapshot = { legacy?: { nodes?: readonly unknown[], runningCalls?: readonly { callId?: string, name?: string }[] } }
 type SessionBinding = { session: ObservableSnapshot<SessionSnapshot> }
 type SessionsFace = { binding(id: string): SessionBinding | undefined }
 type UiConversationFace = { binding(source: SessionBinding): { target(target: string): ObservableSnapshot<ChatSnapshot | undefined> } }
-type UiSessionFace = { pendingInteractions: ObservableSnapshot<ReadonlyMap<string, unknown>> }
+type UiSessionFace = {
+  sessionStatus?: ObservableSnapshot<ReadonlyMap<string, SessionStatusLike>>
+  pendingInteractions?: ObservableSnapshot<ReadonlyMap<string, unknown>>
+}
 type OverlayProps = {
   useSessions: <T>(selector: (state: SessionListLike) => T) => T
+  usePanelInfo?: <T>(selector: (state: { activePanelId: string | null }) => T) => T
   sessions?: SessionsFace
   uiConversation?: UiConversationFace
   uiSession?: UiSessionFace
 }
-const EMPTY_SESSION: SessionSnapshot = { running: false, queue: [], pendingSubmissions: [] }
+const EMPTY_SESSION: SessionSnapshot = {}
 const EMPTY_CHAT: ChatSnapshot = { legacy: { nodes: [], runningCalls: [] } }
 const EMPTY_INTERACTIONS: ReadonlyMap<string, unknown> = new Map()
+const EMPTY_STATUSES: ReadonlyMap<string, SessionStatusLike> = new Map()
 const emptySubscribe = () => () => {}
+const useEmptyPanelInfo = <T,>(selector: (state: { activePanelId: string | null }) => T): T => selector({ activePanelId: null })
 
-export function CraftOverlay({ useSessions, sessions, uiConversation, uiSession }: OverlayProps) {
+export function CraftOverlay({ useSessions, usePanelInfo = useEmptyPanelInfo, sessions, uiConversation, uiSession }: OverlayProps) {
   const prefs = usePreferences()
   const composerClearance = useComposerClearance()
-  const list = useSessions(row => row)
+  const list = normalizeSessionList(useSessions(row => row))
+  const activePanel = usePanelInfo(row => row.activePanelId)
   const binding = list.current ? sessions?.binding(list.current) : undefined
   const session = useSyncExternalStore(
     binding ? listener => binding.session.subscribe(listener) : emptySubscribe,
@@ -40,13 +47,22 @@ export function CraftOverlay({ useSessions, sessions, uiConversation, uiSession 
     chatTarget ? () => chatTarget.getSnapshot() ?? EMPTY_CHAT : () => EMPTY_CHAT,
     () => EMPTY_CHAT,
   )
+  const statusSource = uiSession?.sessionStatus
+  const statuses = useSyncExternalStore(
+    statusSource ? listener => statusSource.subscribe(listener) : emptySubscribe,
+    statusSource ? () => statusSource.getSnapshot() : () => EMPTY_STATUSES,
+    () => EMPTY_STATUSES,
+  )
+  const pendingSource = uiSession?.pendingInteractions
   const pendingInteractions = useSyncExternalStore(
-    uiSession ? listener => uiSession.pendingInteractions.subscribe(listener) : emptySubscribe,
-    uiSession ? () => uiSession.pendingInteractions.getSnapshot() : () => EMPTY_INTERACTIONS,
+    pendingSource ? listener => pendingSource.subscribe(listener) : emptySubscribe,
+    pendingSource ? () => pendingSource.getSnapshot() : () => EMPTY_INTERACTIONS,
     () => EMPTY_INTERACTIONS,
   )
-  const conversation = normalizeConversation(session, chat, Boolean(list.current && pendingInteractions.has(list.current)))
-  const view = projectGameplay(list, conversation)
+  const status = list.current ? statuses.get(list.current) : undefined
+  const pending = statusSource ? Boolean(status?.pendingInteraction) : Boolean(list.current && pendingInteractions.has(list.current))
+  const conversation = normalizeConversation({ running: session.running ?? status?.running }, chat, pending)
+  const view = projectGameplay(list, conversation, statuses)
   const level = Math.round(view.context.ratio * 100)
   const contextAvailable = view.context.used !== undefined && view.context.capacity !== undefined
   const state = level >= 85 ? 'danger' : level >= 65 ? 'warn' : 'ok'
@@ -72,11 +88,11 @@ export function CraftOverlay({ useSessions, sessions, uiConversation, uiSession 
   const hotbarVisible = prefs.hotbar && slots.some(Boolean) && (view.tools.length > 0 || view.pending > 0 || view.agents.some(agent => agent.running))
   const goalVisible = Boolean(view.goal && view.goal.phase !== 'complete')
   useEffect(() => {
-    const active = Boolean(prefs.enabled && list.current && hotbarVisible)
+    const active = Boolean(prefs.enabled && list.current && !activePanel && hotbarVisible)
     document.body.classList.toggle('craft-hotbar-active', active)
     return () => document.body.classList.remove('craft-hotbar-active')
-  }, [hotbarVisible, list.current, prefs.enabled])
-  if (!prefs.enabled || !list.current) return null
+  }, [hotbarVisible, list.current, prefs.enabled, activePanel])
+  if (!prefs.enabled || !list.current || activePanel) return null
   return <div className={`craft-overlay ${hotbarVisible ? 'craft-overlay-with-hotbar' : 'craft-overlay-no-hotbar'} ${goalVisible ? 'craft-overlay-with-goal' : ''}`} aria-hidden="true" style={{ '--craft-hud-bottom': `${composerClearance.bottom}px`, '--craft-composer-left': `${composerClearance.left}px`, '--craft-composer-right': `${composerClearance.right}px` } as CSSProperties}>
     {prefs.atmosphere && <div className="craft-particles">{particles.map((p, i) => <i key={i} style={{ left: p.left, animationDelay: p.delay, animationDuration: p.duration }} />)}</div>}
     {prefs.equipment && (view.model || view.reasoning) && <div className={`craft-equipment ${view.reasoning ? 'craft-enchanted' : ''}`}><ItemIcon item="helmet" /><span><small>{view.provider ?? 'MODEL EQUIPMENT'}</small><b>{view.model ?? 'Unknown model'}</b>{view.reasoning && <em>✦ {view.reasoning} enchantment</em>}</span></div>}
