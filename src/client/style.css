@@ -33,8 +33,8 @@ body.craft-ui-enabled [data-goal-bar]>div>div{gap:5px!important}
 body.craft-ui-enabled [data-goal-bar] button{width:27px!important;height:27px!important;padding:3px!important;color:#fff!important;background:#686e67!important;border:2px solid!important;border-color:#aeb4aa #20231f #20231f #aeb4aa!important;border-radius:0!important;box-shadow:inset 1px 1px rgba(255,255,255,.16),inset -1px -1px rgba(0,0,0,.28)!important}
 body.craft-ui-enabled [data-goal-bar] button:hover{color:#ffffa0!important;background:#6c79a8!important}
 body.craft-ui-enabled button{border-radius:0!important;transition:filter 70ms steps(2,end),transform 55ms steps(2,end)!important}
-body.craft-ui-enabled :is([data-composer-card],[role="dialog"],[data-approval-key],[data-question-key],[data-plan-review-key]) button:not(.craft-close),.craft-control-panel button:not(.craft-close){color:#fff!important;background:var(--mc-button)!important;border:3px solid!important;border-color:#aaa #222 #222 #aaa!important;box-shadow:inset 2px 2px rgba(255,255,255,.18),inset -2px -2px rgba(0,0,0,.28)!important;text-shadow:2px 2px #3f3f3f!important}
-body.craft-ui-enabled :is([data-composer-card],[role="dialog"],[data-approval-key],[data-question-key],[data-plan-review-key]) button:not(.craft-close):hover,.craft-control-panel button:not(.craft-close):hover{color:#ffffa0!important;background:var(--mc-hover)!important;border-color:#c9d0ff #26305a #26305a #c9d0ff!important;filter:none}
+body.craft-ui-enabled :is([data-composer-card],[role="dialog"],[data-approval-key],[data-question-key],[data-plan-review-key]) button:not(.craft-close,[role="switch"],[role="tab"],[role^="menuitem"]),.craft-control-panel button:not(.craft-close){color:#fff!important;background:var(--mc-button)!important;border:3px solid!important;border-color:#aaa #222 #222 #aaa!important;box-shadow:inset 2px 2px rgba(255,255,255,.18),inset -2px -2px rgba(0,0,0,.28)!important;text-shadow:2px 2px #3f3f3f!important}
+body.craft-ui-enabled :is([data-composer-card],[role="dialog"],[data-approval-key],[data-question-key],[data-plan-review-key]) button:not(.craft-close,[role="switch"],[role="tab"],[role^="menuitem"]):hover:enabled,.craft-control-panel button:not(.craft-close):hover:enabled{color:#ffffa0!important;background:var(--mc-hover)!important;border-color:#c9d0ff #26305a #26305a #c9d0ff!important;filter:none}
 body.craft-ui-enabled :is(input:not([type="checkbox"]):not([type="radio"]),textarea,select){border-radius:0!important}
 body.craft-ui-enabled [role="tooltip"]{padding:6px 8px!important;color:#fff!important;background:#100010!important;border:2px solid #5000a0!important;border-radius:0!important;box-shadow:inset 1px 1px #2b0055,3px 3px rgba(0,0,0,.45)!important;text-shadow:1px 1px #000}
 body.craft-ui-enabled[data-craft-assets="modern"] :is(.craft-control-panel,[data-approval-key],[data-question-key],[data-plan-review-key]) button:not(.craft-close){border-image-source:var(--craft-import-button-normal);border-image-slice:var(--craft-import-button-slice,4 fill);border-image-width:5px;border-image-repeat:var(--craft-import-button-repeat,stretch);background:transparent!important}
@@ -42,13 +42,113 @@ body.craft-ui-enabled[data-craft-assets="modern"] :is(.craft-control-panel,[data
 body.craft-ui-enabled[data-craft-assets="modern"] :is(.craft-control-panel,[data-approval-key],[data-question-key],[data-plan-review-key]) button:disabled{border-image-source:var(--craft-import-button-disabled,var(--craft-import-button-normal));filter:grayscale(.7);opacity:.72}
 body.craft-ui-enabled[data-craft-assets="legacy"] .craft-control-panel button:not(.craft-close){background-image:var(--craft-import-button-normal)!important;background-size:128% 1280%!important;background-position:0 27.966%!important;background-repeat:no-repeat!important}
 body.craft-ui-enabled[data-craft-assets="legacy"] .craft-control-panel button:not(.craft-close):hover{background-image:var(--craft-import-button-hover,var(--craft-import-button-normal))!important;background-position:0 36.441%!important}
-body.craft-ui-enabled button:hover{filter:brightness(1.15)}
-body.craft-ui-enabled button:active{transform:translateY(2px)}
+body.craft-ui-enabled button:hover:enabled{filter:brightness(1.15)}
+body.craft-ui-enabled button:active:enabled{transform:translateY(2px)}
 body.craft-ui-enabled :focus-visible{outline:2px solid #f7f2c0!important;outline-offset:2px!important}
 body.craft-ui-enabled ::selection{color:#111;background:#8fda61}
 body.craft-ui-enabled ::-webkit-scrollbar{width:14px;height:14px}
 body.craft-ui-enabled ::-webkit-scrollbar-track{background:#151815;border:2px solid #090a09}
 body.craft-ui-enabled ::-webkit-scrollbar-thumb{background:#626861;border:2px solid;border-color:#939a91 #292d29 #292d29 #939a91}
+/* Native Harness controls: semantic selectors, never versioned CSS-module hashes.
+   Switch thumbs need their own geometry; the generic raised-button skin must
+   not change the track padding or leave the stock round thumb underneath. */
+body.craft-ui-enabled button[role="switch"]{
+  position:relative;display:inline-block;flex:0 0 auto;
+  width:48px!important;min-width:48px!important;height:26px!important;min-height:26px!important;
+  padding:0!important;overflow:hidden;border:2px solid!important;
+  border-color:#121512 #7f887a #7f887a #121512!important;border-radius:0!important;
+  background:#242824!important;box-shadow:inset 0 0 0 2px #080a08!important;
+  text-shadow:none!important;transform:none!important;filter:none!important;
+  cursor:pointer;
+}
+body.craft-ui-enabled button[role="switch"]>span{
+  position:absolute;left:2px;top:2px;display:block;
+  width:18px!important;height:18px!important;border:2px solid!important;
+  border-color:#f0f0e6 #373a34 #373a34 #f0f0e6!important;border-radius:0!important;
+  background:#a7aaa1!important;box-shadow:inset 2px 2px #c6c9bd,inset -2px -2px #747a6d!important;
+  transform:translateX(0)!important;transition:transform 80ms steps(2,end)!important;
+  pointer-events:none;
+}
+body.craft-ui-enabled button[role="switch"]::after{
+  content:"";position:absolute;right:7px;top:8px;width:6px;height:6px;
+  border:2px solid #979b91;pointer-events:none;
+}
+body.craft-ui-enabled button[role="switch"][aria-checked="true"]{background:#315323!important}
+body.craft-ui-enabled button[role="switch"][aria-checked="true"]>span{transform:translateX(22px)!important}
+body.craft-ui-enabled button[role="switch"][aria-checked="true"]::after{left:9px;right:auto;top:7px;width:2px;height:8px;border:0;background:#a5eb73}
+body.craft-ui-enabled button[role="switch"]:hover:enabled>span{background:#b5bfd6!important;border-color:#fff #41475d #41475d #fff!important}
+body.craft-ui-enabled button[role="switch"]:disabled{cursor:not-allowed;opacity:.45;filter:grayscale(1)!important}
+/* Pixel check marks are authored vectors, not imported Minecraft GUI assets. */
+body.craft-ui-enabled input:is([type="checkbox"],[type="radio"]){
+  appearance:none!important;flex:0 0 auto;width:18px!important;height:18px!important;
+  margin:0;vertical-align:middle;border:2px solid!important;border-color:#9c9c92 #30332c #30332c #9c9c92!important;
+  border-radius:0!important;background:#151815!important;box-shadow:inset 1px 1px #060806!important;cursor:pointer;
+}
+body.craft-ui-enabled input[type="checkbox"]:checked{
+  background:#151815 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' shape-rendering='crispEdges'%3E%3Cpath fill='%23e6ffd1' d='M1 5h2v2h2V5h2V3h2V1h2v4H9v2H7v2H5v2H3V9H1z'/%3E%3C/svg%3E") center/12px 12px no-repeat!important;
+}
+body.craft-ui-enabled input[type="checkbox"]:indeterminate{background:#151815 linear-gradient(#e6ffd1,#e6ffd1) center/10px 2px no-repeat!important}
+body.craft-ui-enabled input[type="radio"]:checked{background:#151815 linear-gradient(#c3ed9d,#c3ed9d) center/8px 8px no-repeat!important}
+body.craft-ui-enabled input:is([type="checkbox"],[type="radio"]):hover:enabled{border-color:#ffffa0!important}
+body.craft-ui-enabled input:is([type="checkbox"],[type="radio"]):disabled{cursor:not-allowed;opacity:.5}
+/* Only segmented/tab controls, not DockKit's editor tab strip. */
+body.craft-ui-enabled [role="tablist"]:not([data-dockkit-strip]){border-radius:0!important;background:#171a16!important;box-shadow:inset 1px 1px #080a07;padding:3px;gap:3px}
+body.craft-ui-enabled [role="tablist"]:not([data-dockkit-strip])>span[aria-hidden="true"]{display:none!important}
+body.craft-ui-enabled [role="tablist"]:not([data-dockkit-strip]) [role="tab"]{
+  border:2px solid!important;border-color:#a5aa9f #20251d #20251d #a5aa9f!important;border-radius:0!important;
+  color:#e1e1d7!important;background:#555c50!important;box-shadow:inset 1px 1px #6d7667!important;
+  text-shadow:1px 1px #222!important;transform:none!important;
+}
+body.craft-ui-enabled [role="tablist"]:not([data-dockkit-strip]) [role="tab"][aria-selected="true"]{
+  color:#ffffa0!important;background:#3f4935!important;border-color:#1a2016 #a3b38a #a3b38a #1a2016!important;
+  box-shadow:inset 0 -2px #98ca68!important;
+}
+body.craft-ui-enabled [role="tablist"]:not([data-dockkit-strip]) [role="tab"]:hover:enabled{color:#ffffa0!important;background:#606c84!important}
+/* Preserve selection feedback that the broad button skin used to erase. */
+body.craft-ui-enabled :is([role="dialog"],[data-question-key]) button:is([aria-pressed="true"],[aria-current="true"],[role="radio"][aria-checked="true"],[role="checkbox"][aria-checked="true"]){
+  color:#ffffa0!important;background:#46533a!important;border-color:#c4d99c #27301e #27301e #c4d99c!important;
+  box-shadow:inset 0 -2px #94c764!important;
+}
+body.craft-ui-enabled :is([role="menu"],[role="listbox"]){border-radius:0!important;background:var(--dsw-alias-bg-layer-1)!important}
+body.craft-ui-enabled :is([role="menuitem"],[role="menuitemradio"],[role="menuitemcheckbox"],[role="option"]){
+  border-radius:0!important;border:1px solid transparent!important;
+  background:transparent!important;box-shadow:none!important;color:var(--dsw-alias-label-primary)!important;
+  text-shadow:none!important;transform:none!important;
+}
+body.craft-ui-enabled :is([role="menuitemradio"],[role="menuitemcheckbox"])[aria-checked="true"],
+body.craft-ui-enabled [role="option"][aria-selected="true"]{background:#35472a!important;color:#e1ffc4!important;box-shadow:inset 3px 0 #91cc64!important}
+body.craft-ui-enabled :is([role="menuitem"],[role="menuitemradio"],[role="menuitemcheckbox"],[role="option"]):not(:disabled):not([aria-disabled="true"]):is(:hover,:focus-visible){background:#515f7a!important;color:#ffffa0!important;border-color:#afbad7!important}
+body.craft-ui-enabled [role="dialog"] :is(input:not([type="checkbox"],[type="radio"],[type="range"],[type="file"],[type="hidden"]),textarea,select){
+  color:var(--dsw-alias-label-primary)!important;background-color:var(--dsw-specific-input-major)!important;
+  border:2px solid!important;border-color:#151815 #899080 #899080 #151815!important;
+  border-radius:0!important;box-shadow:inset 1px 1px #080a08!important;
+}
+body.craft-ui-enabled select{
+  appearance:none!important;border-radius:0!important;color:var(--dsw-alias-label-primary)!important;
+  background-color:var(--dsw-specific-input-major)!important;border:2px solid!important;border-color:#151815 #899080 #899080 #151815!important;
+  padding-inline-end:26px!important;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 6' shape-rendering='crispEdges'%3E%3Cpath fill='%23959d89' d='M0 0h8v2H6v2H4v2H2V4H0z'/%3E%3C/svg%3E")!important;
+  background-position:right 8px center!important;background-size:8px 6px!important;background-repeat:no-repeat!important;
+}
+body.craft-ui-enabled :is(input,textarea,select)[aria-invalid="true"],body.craft-ui-enabled [role="dialog"] :is(input,textarea,select)[aria-invalid="true"]{border-color:#dc806b!important}
+body.craft-ui-enabled :is(button,input,textarea,select):disabled{cursor:not-allowed}
+body.craft-ui-enabled button:disabled:not([aria-disabled="false"]){filter:grayscale(1)!important;opacity:.5}
+body.craft-ui-enabled button:disabled[aria-disabled="false"]{cursor:default}
+body.craft-ui-enabled :is(input,textarea,select):disabled{color:var(--dsw-alias-label-caption)!important}
+body.craft-ui-enabled [role="dialog"] li:has(>button[aria-pressed]){border-radius:0!important;border-width:2px!important;background:var(--dsw-alias-bg-layer-1)!important}
+body.craft-ui-enabled [role="dialog"] li:has(>button[aria-pressed="true"]){border-color:#a7bf80!important}
+body.craft-ui-enabled span[data-tone]{border-radius:0!important;box-shadow:none!important}
+body.craft-ui-enabled [data-guide-page] :is(p,pre,code){border-radius:0!important;font-family:var(--craft-font)!important}
+/* The upstream font-size stepper has no role/data hook of its own. Scope its
+   stable local CSS-module name to the public General Settings slot. */
+body.craft-ui-enabled [data-slot="settings.general.item"] [class$="_stepper"]{
+  border-radius:0!important;background:var(--dsw-specific-input-major)!important;
+  border:2px solid;border-color:#171a15 #929888 #929888 #171a15;padding-inline:8px 26px;
+}
+body.craft-ui-enabled [data-slot="settings.general.item"] [class$="_stepper"]>span:has(button){opacity:1!important}
+body.craft-ui-enabled [data-slot="settings.general.item"] [class$="_stepper"] button{
+  border-width:1px!important;box-shadow:none!important;min-height:12px;padding:0!important;
+}
 .craft-sidebar-button{display:grid;place-items:center;width:32px;height:32px;padding:3px!important;background:#4b504a!important;border:2px solid!important;border-color:#8e958b #171917 #171917 #8e958b!important;box-shadow:none!important}
 .craft-sprite{display:inline-block;flex:none;background-image:url("__ASSET_ICONS__");background-repeat:no-repeat;image-rendering:pixelated}
 .craft-item-icon{position:relative;display:inline-grid;place-items:center;flex:none;image-rendering:pixelated}.craft-item-icon>i,.craft-item-icon>.craft-item-fallback{position:absolute;inset:0}.craft-item-icon>i{z-index:2;background-image:var(--craft-item-image);background-position:center;background-repeat:no-repeat;background-size:100% 100%;opacity:var(--craft-item-available)}.craft-item-icon>.craft-item-fallback{z-index:1;opacity:calc(1 - var(--craft-item-available))}
@@ -95,7 +195,9 @@ body[data-craft-assets="modern"] .craft-hotbar{background-color:transparent;back
 .craft-particles{position:absolute;inset:0;overflow:hidden;opacity:.45}.craft-particles i{position:absolute;bottom:-8px;width:4px;height:4px;background:#a6ee73;box-shadow:0 0 5px #7dca52;animation:craft-particle linear infinite}
 .craft-enchanted>.craft-item-icon:after{content:"";position:absolute;inset:1px;z-index:3;background:linear-gradient(115deg,transparent 25%,rgba(190,80,255,.72) 42%,rgba(70,150,255,.45) 50%,transparent 66%);background-size:260% 100%;mix-blend-mode:screen;animation:craft-enchant-item 2.1s linear infinite;pointer-events:none}.craft-hotbar>div.active .craft-item-icon{animation:craft-item-bob .8s steps(2,end) infinite}
 body.craft-ui-enabled[data-craft-motion="reduced"] .craft-particles,body.craft-ui-enabled[data-craft-motion="off"] .craft-particles{display:none}
-body.craft-ui-enabled[data-craft-motion="off"] *,@media(prefers-reduced-motion:reduce){body.craft-ui-enabled *{animation:none!important;transition:none!important}}
+body.craft-ui-enabled[data-craft-motion="off"] *,body.craft-ui-enabled[data-craft-motion="off"] *::before,body.craft-ui-enabled[data-craft-motion="off"] *::after{animation:none!important;transition:none!important}
+body.craft-ui-enabled:is([data-craft-motion="off"],[data-craft-motion="reduced"]) button[role="switch"]>span{transition:none!important}
+@media(prefers-reduced-motion:reduce){body.craft-ui-enabled *,body.craft-ui-enabled *::before,body.craft-ui-enabled *::after,body.craft-ui-enabled button[role="switch"]>span{animation:none!important;transition:none!important}}
 @keyframes craft-fade-in{from{opacity:0}to{opacity:1}}
 @keyframes craft-slide-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
 @keyframes craft-particle{from{transform:translateY(0);opacity:0}15%{opacity:1}to{transform:translateY(-100vh);opacity:0}}

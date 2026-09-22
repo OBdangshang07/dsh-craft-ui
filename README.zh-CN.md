@@ -30,7 +30,7 @@
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.3.0.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.3.1.tgz
 ```
 
 该插件是一个 DSH Host + Client 组合包。`cordis.patch.yml` 会插入稳定的 bundle 层；客户端使用 Harness 已公开的主题、插槽、连接、会话和对话服务。
@@ -71,7 +71,7 @@ dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.3.0.tgz
 
 ## 兼容性
 
-`0.3.0` 适配 DeepSeek Harness `0.1.7-alpha.1`，可通过上游 `alpha` 通道安装（`npm install -g @deepseek-ai/dsh@0.1.7-alpha.1`）。已迁移主视图会话选择、统一会话状态、子任务目录、模型信息与认证资源接口，设置页也适配了新版侧栏及窄屏布局。集成契约请参阅 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界请参阅 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
+`0.3.1` 适配 DeepSeek Harness `0.1.7-alpha.1`，可通过上游 `alpha` 通道安装（`npm install -g @deepseek-ai/dsh@0.1.7-alpha.1`）。已迁移主视图会话选择、统一会话状态、子任务目录、模型信息与认证资源接口，设置页也适配了新版侧栏及窄屏布局。原生滑动开关、复选框、单选框、分段选项、菜单、下拉框和字号步进器均有专用像素样式，覆盖选中、禁用、错误和减少动效状态。集成契约请参阅 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界请参阅 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
 
 ## 验证
 

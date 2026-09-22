@@ -1,6 +1,6 @@
 {
   "name": "dsh-craft-ui",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A high-fidelity Minecraft-inspired UI and gameplay layer for DeepSeek Harness",
   "type": "module",
   "main": "lib/index.js",
