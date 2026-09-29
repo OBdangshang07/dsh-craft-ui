@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
-import { defaultSelection, effortSelection, reasoningView, type ModelSelection, type ModelState } from '../reasoning.ts'
+import { defaultSelection, effortSelection, modelMatchesQuery, reasoningView, type ModelSelection, type ModelState } from '../reasoning.ts'
 import { getPreferences, subscribePreferences } from '../store.ts'
 import { useTranslate } from '../workbench/ui.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
@@ -14,7 +14,7 @@ export function ReasoningControl({ directory, locked, available }: { directory: 
   const tr = useTranslate(), id = useId()
   const subscribe = useCallback((fn: () => void) => directory.store.subscribe(fn), [directory])
   const state = useSyncExternalStore(subscribe, () => directory.store.getSnapshot()), view = reasoningView(state)
-  const [open, setOpen] = useState(false), [models, setModels] = useState(false), [error, setError] = useState(''), [busy, setBusy] = useState(false)
+  const [open, setOpen] = useState(false), [models, setModels] = useState(false), [modelQuery, setModelQuery] = useState(''), [error, setError] = useState(''), [busy, setBusy] = useState(false)
   const [preview, setPreview] = useState<number>(), pending = useRef<{ index: number, identity: string }>()
   const inFlight = useRef(false), alive = useRef(true)
   const trigger = useRef<HTMLButtonElement>(null), popup = useRef<HTMLDivElement>(null)
@@ -22,6 +22,7 @@ export function ReasoningControl({ directory, locked, available }: { directory: 
   const inactive = locked || busy || state.status === 'selecting' || state.status === 'loading'
   const shown = preview ?? view.index, label = shown < 0 ? view.label : view.levels[shown]?.name ?? view.label
   const modelName = view.model?.name ?? (state.current ? `${state.current.provider}/${state.current.model}` : tr('选择模型', 'Select model'))
+  const matchingGroups = state.groups.map(group => ({ ...group, models: group.models.filter(model => modelMatchesQuery(modelQuery, model, group.name)) })).filter(group => group.models.length)
   const discard = () => { pending.current = undefined; setPreview(undefined) }
   const close = (restore = false) => { discard(); setOpen(false); if (restore) trigger.current?.focus({ preventScroll: true }) }
   const reload = useCallback(() => { void directory.load().catch(() => {}) }, [directory])
@@ -75,7 +76,7 @@ export function ReasoningControl({ directory, locked, available }: { directory: 
   }, [open, models])
   useEffect(() => {
     if (!open) return
-    const focus = requestAnimationFrame(() => (popup.current?.querySelector<HTMLElement>(models ? '[aria-checked="true"],button:not(:disabled)' : 'input:not(:disabled),button:not(:disabled)'))?.focus({ preventScroll: true }))
+    const focus = requestAnimationFrame(() => (popup.current?.querySelector<HTMLElement>(models ? '.craft-model-search input:not(:disabled)' : 'input:not(:disabled),button:not(:disabled)'))?.focus({ preventScroll: true }))
     const outside = (event: PointerEvent) => { if (!popup.current?.contains(event.target as Node) && !trigger.current?.contains(event.target as Node)) close() }
     document.addEventListener('pointerdown', outside, true)
     return () => { cancelAnimationFrame(focus); document.removeEventListener('pointerdown', outside, true) }
@@ -85,17 +86,26 @@ export function ReasoningControl({ directory, locked, available }: { directory: 
     <button ref={trigger} type="button" className="craft-model-trigger" disabled={locked} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined} aria-label={tr(`选择模型，当前 ${modelName}${view.label ? `，推理等级 ${view.label}` : ''}`, `Select model, current ${modelName}${view.label ? `, effort ${view.label}` : ''}`)} title={`${modelName}${view.label ? ` · ${view.label}` : ''}`} onClick={() => { if (open) close(); else { setModels(false); setOpen(true); reload() } }}><span className="craft-model-icon"><ItemIcon item="book" size={18} /></span><span className="craft-model-name">{modelName}</span>{view.label && <span className="craft-model-effort">{view.label}</span>}<span aria-hidden="true">{open ? '▴' : '▾'}</span></button>
     {open && createPortal(<div ref={popup} id={id} role="dialog" aria-label={tr('模型与推理等级', 'Model and reasoning effort')} className="craft-reasoning-popup" style={position} onKeyDown={event => {
       if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); discard(); models ? setModels(false) : close(true) }
+      if (models && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+        const choices = [...popup.current!.querySelectorAll<HTMLElement>('.craft-model-list [role="menuitemradio"]:not(:disabled)')]
+        const active = document.activeElement as HTMLElement
+        if (choices.length && (active.matches('.craft-model-search input') || choices.includes(active))) {
+          event.preventDefault(); event.stopPropagation()
+          const index = choices.indexOf(active)
+          choices[index < 0 ? event.key === 'ArrowDown' ? 0 : choices.length - 1 : (index + (event.key === 'ArrowDown' ? 1 : choices.length - 1)) % choices.length]?.focus()
+        }
+      }
       if (event.key === 'Tab') {
         const items = [...popup.current!.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled)')], index = items.indexOf(document.activeElement as HTMLElement)
         if (event.shiftKey && index <= 0) { event.preventDefault(); items.at(-1)?.focus() }
         else if (!event.shiftKey && index === items.length - 1) { event.preventDefault(); items[0]?.focus() }
       }
     }}>
-      {models ? <><header><button type="button" onClick={() => setModels(false)} aria-label={tr('返回推理等级', 'Back to reasoning')}>◀</button><b>{tr('选择模型', 'Select model')}</b><button type="button" onClick={() => close(true)} aria-label={tr('关闭', 'Close')}>×</button></header><div className="craft-model-list" role="menu" aria-label={tr('可用模型', 'Available models')}>
-        {state.groups.map(group => <section key={group.id}><h3>{group.name}</h3>{group.models.map(model => <button type="button" key={model.id} role="menuitemradio" aria-checked={state.current?.provider === group.id && state.current.model === model.id} disabled={inactive} title={model.description} onClick={() => { if (state.current?.provider === group.id && state.current.model === model.id) setModels(false); else void select(defaultSelection(group.id, model)) }}>{model.name}<span aria-hidden="true">{state.current?.provider === group.id && state.current.model === model.id ? '✓' : ''}</span></button>)}</section>)}
-        {state.failures.map(failure => <p key={failure.id} role="status">{failure.name}: {failure.message}</p>)}{!state.groups.length && <p>{tr('暂无可用模型，请刷新。', 'No model catalog available. Try reloading.')}</p>}
+      {models ? <><header><button type="button" onClick={() => setModels(false)} aria-label={tr('返回推理等级', 'Back to reasoning')}>◀</button><b>{tr('选择模型', 'Select model')}</b><button type="button" onClick={() => close(true)} aria-label={tr('关闭', 'Close')}>×</button></header><label className="craft-model-search"><span>{tr('搜索模型', 'Search models')}</span><input type="search" value={modelQuery} onChange={event => setModelQuery(event.currentTarget.value)} placeholder={tr('输入名称或提供方', 'Name or provider')} aria-label={tr('搜索模型', 'Search models')} /></label><div className="craft-model-list" role="menu" aria-label={tr('可用模型', 'Available models')}>
+        {matchingGroups.map(group => <section key={group.id}><h3>{group.name}</h3>{group.models.map(model => <button type="button" key={model.id} role="menuitemradio" aria-checked={state.current?.provider === group.id && state.current.model === model.id} disabled={inactive} title={model.description} onClick={() => { if (state.current?.provider === group.id && state.current.model === model.id) setModels(false); else void select(defaultSelection(group.id, model)) }}>{model.name}<span aria-hidden="true">{state.current?.provider === group.id && state.current.model === model.id ? '✓' : ''}</span></button>)}</section>)}
+        {state.failures.map(failure => <p key={failure.id} role="status">{failure.name}: {failure.message}</p>)}{!state.groups.length ? <p>{tr('暂无可用模型，请刷新。', 'No model catalog available. Try reloading.')}</p> : !matchingGroups.length && <p>{tr('没有匹配的模型。', 'No matching models.')}</p>}
       </div></> : <>
-        <header className="craft-model-heading"><button type="button" className="craft-reasoning-model" title={tr(`切换模型，当前 ${modelName}`, `Change model, current ${modelName}`)} aria-label={tr(`切换模型，当前 ${modelName}`, `Change model, current ${modelName}`)} aria-haspopup="menu" onClick={() => { discard(); setModels(true) }}><span className="craft-model-caption">{tr('模型', 'Model')}</span><span className="craft-model-current">{modelName}</span><span className="craft-model-change">{tr('切换', 'Change')} <span aria-hidden="true">▾</span></span></button><button type="button" aria-label={tr('关闭', 'Close')} onClick={() => close(true)}>×</button></header>
+        <header className="craft-model-heading"><button type="button" className="craft-reasoning-model" title={tr(`切换模型，当前 ${modelName}`, `Change model, current ${modelName}`)} aria-label={tr(`切换模型，当前 ${modelName}`, `Change model, current ${modelName}`)} aria-haspopup="menu" onClick={() => { discard(); setModelQuery(''); setModels(true) }}><span className="craft-model-caption">{tr('模型', 'Model')}</span><span className="craft-model-current">{modelName}</span><span className="craft-model-change">{tr('切换', 'Change')} <span aria-hidden="true">▾</span></span></button><button type="button" aria-label={tr('关闭', 'Close')} onClick={() => close(true)}>×</button></header>
         <div className="craft-reasoning-heading"><span>{tr('推理等级', 'Reasoning effort')}</span><strong aria-live="polite">{label || tr('未提供', 'Unavailable')}{preview !== undefined ? ' *' : ''}</strong><button type="button" className="craft-effort-reset" disabled={inactive || !view.model?.reasoning || !state.current} title={tr('恢复此模型的默认等级', 'Restore this model’s default effort')} aria-label={tr('恢复默认推理等级', 'Reset reasoning effort')} onClick={() => { if (state.current && view.model) void select(defaultSelection(state.current.provider, view.model)) }}>↺</button></div>
         {view.levels.length > 0 ? <div className="craft-effort-slider" data-unmapped={shown < 0 || undefined} style={{ '--craft-effort-count': view.levels.length, '--craft-effort-progress': `${100 * Math.max(0, shown) / Math.max(1, view.levels.length - 1)}%` } as CSSProperties}>
           <div className="craft-effort-track" aria-hidden="true"><i />{view.levels.map((level, i) => <span key={level.id ?? 'default'} data-active={shown >= i || undefined} style={{ left: `${100 * i / Math.max(1, view.levels.length - 1)}%` }} />)}</div>

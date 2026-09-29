@@ -54,6 +54,10 @@ await withCanaryBrowser(log, async b => {
   // New panel uses the real model catalog and can return without changing model.
   await evaluate(`document.querySelector('.craft-reasoning-model').click()`)
   await waitFor(`!!document.querySelector('.craft-model-list [aria-checked="true"]')`)
+  await waitFor(`document.activeElement===document.querySelector('.craft-model-search input')`)
+  await call('Input.insertText', { text: 'Pro' })
+  await waitFor(`document.querySelectorAll('.craft-model-list [role="menuitemradio"]').length===1`)
+  assert.match(await evaluate(`document.querySelector('.craft-model-list [role="menuitemradio"]').textContent`), /Pro/)
   await capture('reasoning-model-list')
   await clickText('返回推理等级')
   for (const width of [1440, 640, 390]) {

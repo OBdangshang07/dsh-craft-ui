@@ -44,7 +44,7 @@ Requires Node.js 22 or newer and a compatible DeepSeek Harness build.
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.0.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.1.tgz
 ```
 
 The plugin is a DSH Host + Client combo package. `cordis.patch.yml` inserts its stable bundle layer; the client uses documented theme, slot, connection, session, and conversation services.
@@ -85,7 +85,7 @@ The client embeds `Fusion Pixel 10px Monospaced zh-Hans` as WOFF2 at build time,
 
 ## Compatibility
 
-Version `0.4.0` targets DeepSeek Harness `0.1.7-alpha.1`, available on the upstream `alpha` channel (`npm install -g @deepseek-ai/dsh@0.1.7-alpha.1`). It adapts main-view Session ownership, unified Session status, subagent catalogs, model metadata, and authenticated resource routes. The settings screen stays above the redesigned sidebar at every width. Native switches, checkboxes, radio inputs, segmented tabs, menus, selects, and the font-size stepper have dedicated pixel styling, including selected, disabled, invalid, and reduced-motion states. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
+Version `0.4.1` has been tested against DeepSeek Harness `0.2.0-rc.2` in the Web profile (`npm install -g @deepseek-ai/dsh@0.2.0-rc.2`). The model picker now retains search and keyboard selection when Craft UI occupies the native control. The `0.1.7-alpha.1` integration remains covered by automated contract tests, but live verification for this release used `0.2.0-rc.2`. Desktop uses a separate application-owned profile and has not been claimed as tested. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
 
 ## Verification
 

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { readFile } from 'node:fs/promises'
-import { reasoningView, effortSelection, defaultSelection } from '../lib/client-reasoning.js'
+import { reasoningView, effortSelection, defaultSelection, modelMatchesQuery } from '../lib/client-reasoning.js'
 
 const model = (ids = ['off', 'low', 'high', 'max'], extra = {}) => ({ id: 'example', name: 'Example', reasoning: { efforts: ids.map(id => ({ id, name: id.toUpperCase() })), defaultEffort: 'high', ...extra } })
 const state = (row = model(), current = { provider: 'p', model: 'example', reasoningEffort: 'max' }) => ({ current, groups: [{ id: 'p', name: 'Provider', models: [row] }], status: 'ready', failures: [], error: null, routable: true })
@@ -19,6 +19,14 @@ test('unadvertised models/efforts are not fabricated or silently normalized', ()
   assert.equal(view.index, -1); assert.equal(view.label, 'unknown')
   assert.equal(effortSelection(s, view.identity, -1), undefined)
   assert.equal(reasoningView(state(model(), { provider: 'missing', model: 'example' })).levels.length, 0)
+})
+
+test('model search keeps provider, model id and fuzzy keyboard discovery available', () => {
+  const row = model()
+  assert.equal(modelMatchesQuery('  v41 flash ', { ...row, id: 'deepseek-v41-flash', name: 'DeepSeek V4.1 Flash' }, 'DeepSeek'), true)
+  assert.equal(modelMatchesQuery('dsvf', { ...row, name: 'DeepSeek V4.1 Flash' }, 'DeepSeek'), true)
+  assert.equal(modelMatchesQuery('provider example', row, 'Provider'), true)
+  assert.equal(modelMatchesQuery('missing', row, 'Provider'), false)
 })
 test('default effort follows model metadata, including provider-owned default with no explicit ID', () => {
   const s = state(model(undefined, { defaultEffort: undefined }), { provider: 'p', model: 'example' }), view = reasoningView(s)
