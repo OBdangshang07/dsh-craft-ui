@@ -44,7 +44,7 @@
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.1.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.2.tgz
 ```
 
 该插件是一个 DSH Host + Client 组合包。`cordis.patch.yml` 会插入稳定的 bundle 层；客户端使用 Harness 已公开的主题、插槽、连接、会话和对话服务。
@@ -74,6 +74,8 @@ dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.1.tgz
 
 客户端会在构建时嵌入 `Fusion Pixel 10px Monospaced zh-Hans` 的 WOFF2 文件，因此界面不依赖系统字体或在线字体服务。同一份经过审查的字体文件、SIL Open Font License 1.1 许可证文本及内置组件的许可证声明均包含在 `assets/fonts/` 中。如果浏览器无法加载 WOFF2，样式表会回退到可读的系统等宽字体和中日韩字体。
 
+在 DSH 0.2.1 中，启用 Craft UI 时会临时覆盖界面正文字体变量，不改写你保存的字体偏好。不覆盖代码和终端的原生字体变量、字号偏好；已有的明确像素化面板仍保留原有排版。关闭插件后恢复原生正文字体，主输入框继续保持像素字体和一致的光标行高。
+
 ## 无障碍与安全性
 
 - 提供完整、减少和关闭三种动效模式；操作系统的“减少动态效果”偏好拥有最高优先级。
@@ -85,7 +87,9 @@ dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.1.tgz
 
 ## 兼容性
 
-`0.4.1` 已在 DeepSeek Harness `0.2.0-rc.2` 的 Web profile 中实测（`npm install -g @deepseek-ai/dsh@0.2.0-rc.2`）。插件接管原生模型入口时，现在仍提供搜索与键盘选择。`0.1.7-alpha.1` 的集成仍有自动化契约测试覆盖，但此版现场验证基线为 `0.2.0-rc.2`。桌面版使用应用独立管理的 profile，尚未宣称完成桌面版实测。集成契约请参阅 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界请参阅 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
+`0.4.2` 适配 DeepSeek Harness Web `0.2.1-alpha.2`（2026-10-10 核验），同时在 `0.2.0-rc.2` 上做了向后兼容冒烟测试。alpha 通道需要主动选择；更新插件不要求将稳定版 DSH 升级到 alpha。桌面版独立管理的 profile 尚未实测。集成契约请参阅 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界请参阅 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
+
+本版适配原生多行目标编辑器：像素面板自动增高、超过六行滚动，保留 Enter 保存、Shift+Enter 换行和 Escape 取消；经验值栏按目标面板实际边界定位。HUD 使用真实的响应式缩放比例，避让增高后的输入区。新增的正文/代码/终端字体设置保留原生操作，并适配窄屏设置列。图片工作台、书签持久化和推理/模型选择均在隔离 alpha profile 中复测，未提交模型请求。旧版 Session 快照的兼容回退仍有自动化契约测试覆盖。
 
 ## 验证
 

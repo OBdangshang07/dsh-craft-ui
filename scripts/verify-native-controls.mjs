@@ -54,6 +54,27 @@ await withCanaryBrowser(logPath, async browser => {
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('[data-slot="settings.general.item"] [class$="_stepper"]')).borderRadius`), '0px')
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('[role="dialog"] button[aria-current="true"]')).color`), 'rgb(255, 255, 160)')
   await capture('native-general-fixed')
+  // 0.2.1 adds three font-family fields and independent code/terminal steppers.
+  if (await evaluate(`!!document.querySelector('button[aria-label="更多字体设置"]')`)) {
+    await clickText('更多字体设置')
+    await waitFor(`!!document.querySelector('input[aria-label="终端字体"]')`)
+    assert.equal(await evaluate(`document.querySelectorAll('[data-slot="settings.general.item"] [class$="_stepper"]').length`), 3)
+    for (const width of [1440,640,390]) {
+      await call('Emulation.setDeviceMetricsOverride', {width,height:1000,deviceScaleFactor:1,mobile:false})
+      await delay(150)
+      const fonts = await evaluate(`(() => {
+        const dialog=document.querySelector('[role="dialog"]'), d=dialog.getBoundingClientRect();
+        return [...dialog.querySelectorAll('input[aria-label$="字体"],[class$="_stepper"]')].map(el=>{const frame=el.tagName==='INPUT'?el.parentElement:el,r=frame.getBoundingClientRect(),s=getComputedStyle(frame);return {label:el.getAttribute('aria-label')||'stepper',fits:r.left>=d.left && r.right<=d.right,radius:s.borderRadius,border:s.borderTopWidth,font:getComputedStyle(el).fontFamily}});
+      })()`)
+      assert.equal(fonts.length,6)
+      for (const field of fonts) { assert.ok(field.fits,`Font settings overflow at ${width}: ${JSON.stringify(field)}`);assert.equal(field.radius,'0px');assert.equal(field.border,'2px') }
+      assert.ok(await evaluate(`document.querySelector('[role="dialog"]').clientWidth >= document.querySelector('[role="dialog"]').scrollWidth`), `General settings horizontal overflow at ${width}`)
+      await evaluate(`document.querySelector('input[aria-label="正文字体"]').scrollIntoView({block:'start'})`)
+      await capture(`native-font-roles-${width}`)
+    }
+    await call('Emulation.setDeviceMetricsOverride', {width:1440,height:1000,deviceScaleFactor:1,mobile:false})
+    await clickText('更多字体设置')
+  }
 
   await clickText('内置插件')
   await waitFor(`!!document.querySelector('[role="dialog"] input[type="search"]')`)

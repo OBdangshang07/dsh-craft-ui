@@ -44,7 +44,7 @@ Requires Node.js 22 or newer and a compatible DeepSeek Harness build.
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.1.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.2.tgz
 ```
 
 The plugin is a DSH Host + Client combo package. `cordis.patch.yml` inserts its stable bundle layer; the client uses documented theme, slot, connection, session, and conversation services.
@@ -74,6 +74,8 @@ Use **清除缓存** to remove the whole private Craft UI resource cache and res
 
 The client embeds `Fusion Pixel 10px Monospaced zh-Hans` as WOFF2 at build time, so the UI does not depend on a system font or a network font service. The same reviewed file, its SIL Open Font License 1.1 text, and bundled-component license notices are included under `assets/fonts/`. If the browser cannot load WOFF2, the stylesheet falls back to readable system monospace/CJK fonts.
 
+In DSH 0.2.1, Craft UI overrides the interface text token while enabled without rewriting your saved font preferences. Native code/terminal font tokens and size preferences are not overridden, and disabling Craft UI restores the native text font. Explicitly pixel-skinned panels keep their existing typography. The composer retains its fixed pixel-font caret metrics.
+
 ## Accessibility and safety
 
 - Full, reduced, and off motion modes are available; the operating-system reduced-motion preference wins.
@@ -85,7 +87,9 @@ The client embeds `Fusion Pixel 10px Monospaced zh-Hans` as WOFF2 at build time,
 
 ## Compatibility
 
-Version `0.4.1` has been tested against DeepSeek Harness `0.2.0-rc.2` in the Web profile (`npm install -g @deepseek-ai/dsh@0.2.0-rc.2`). The model picker now retains search and keyboard selection when Craft UI occupies the native control. The `0.1.7-alpha.1` integration remains covered by automated contract tests, but live verification for this release used `0.2.0-rc.2`. Desktop uses a separate application-owned profile and has not been claimed as tested. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
+Version `0.4.2` targets DeepSeek Harness Web `0.2.1-alpha.2` (checked 2026-10-10), with a backward-compatibility smoke check on `0.2.0-rc.2`. The alpha channel is opt-in; updating this plugin does not require upgrading a stable DSH installation. Desktop's separate application-owned profile has not been tested. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
+
+This release adapts the native multiline goal editor: a growing pixel-styled panel, six-line scrolling, original Enter/Shift+Enter/Escape behavior, and an XP footer anchored to the measured goal bounds. HUD positioning uses the actual responsive zoom and clears tall composer seats. The new text/code/terminal font settings retain their native actions and fit narrow settings columns. Image workbench, notebook persistence and the reasoning/model picker were rechecked in an isolated alpha profile without submitting model requests. Compatibility fallbacks for older Session snapshots remain covered by automated contract tests.
 
 ## Verification
 

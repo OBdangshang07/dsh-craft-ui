@@ -93,7 +93,7 @@ export function CraftOverlay({ useSessions, usePanelInfo = useEmptyPanelInfo, se
     return () => document.body.classList.remove('craft-hotbar-active')
   }, [hotbarVisible, list.current, prefs.enabled, activePanel])
   if (!prefs.enabled || !list.current || activePanel) return null
-  return <div className={`craft-overlay ${hotbarVisible ? 'craft-overlay-with-hotbar' : 'craft-overlay-no-hotbar'} ${goalVisible ? 'craft-overlay-with-goal' : ''}`} aria-hidden="true" style={{ '--craft-hud-bottom': `${composerClearance.bottom}px`, '--craft-composer-left': `${composerClearance.left}px`, '--craft-composer-right': `${composerClearance.right}px` } as CSSProperties}>
+  return <div className={`craft-overlay ${hotbarVisible ? 'craft-overlay-with-hotbar' : 'craft-overlay-no-hotbar'} ${goalVisible ? 'craft-overlay-with-goal' : ''}`} aria-hidden="true" style={{ '--craft-hud-bottom': `${composerClearance.bottom}px`, '--craft-composer-left': `${composerClearance.left}px`, '--craft-composer-right': `${composerClearance.right}px`, '--craft-goal-footer-bottom': `${composerClearance.goalBottom}px`, '--craft-goal-left': `${composerClearance.goalLeft}px`, '--craft-goal-right': `${composerClearance.goalRight}px` } as CSSProperties}>
     {prefs.atmosphere && <div className="craft-particles">{particles.map((p, i) => <i key={i} style={{ left: p.left, animationDelay: p.delay, animationDuration: p.duration }} />)}</div>}
     {prefs.equipment && (view.model || view.reasoning) && <div className={`craft-equipment ${view.reasoning ? 'craft-enchanted' : ''}`}><ItemIcon item="helmet" /><span><small>{view.provider ?? 'MODEL EQUIPMENT'}</small><b>{view.model ?? 'Unknown model'}</b>{view.reasoning && <em>✦ {view.reasoning} enchantment</em>}</span></div>}
     {prefs.agentList && view.agents.length > 0 && <div className="craft-player-list"><header><ItemIcon item="agent" size={20} /> COMPANIONS</header>{view.agents.slice(0, 6).map(agent => <div key={agent.id}><i className={agent.running ? 'online' : ''} /><span>{agent.label}</span><small>{agent.running ? 'WORKING' : 'IDLE'}</small></div>)}</div>}
@@ -106,35 +106,45 @@ export function CraftOverlay({ useSessions, usePanelInfo = useEmptyPanelInfo, se
   </div>
 }
 
-function useComposerClearance(): { bottom: number, left: number, right: number } {
-  const [clearance, setClearance] = useState({ bottom: 12, left: 12, right: 12 })
+function useComposerClearance() {
+  const [clearance, setClearance] = useState({ bottom: 12, left: 12, right: 12, goalBottom: 12, goalLeft: 40, goalRight: 40 })
   useEffect(() => {
     let composer: Element | null = null
     let composerSeat: Element | null = null
+    let goalPanel: Element | null = null
     let resizeObserver: ResizeObserver | undefined
     const update = () => {
       const nextComposer = document.querySelector('[data-composer-card]')
       const nextSeat = document.querySelector('[data-composer-seat]')
-      if (nextComposer !== composer || nextSeat !== composerSeat) {
+      const nextGoal = document.querySelector('[data-goal-bar]>div')
+      if (nextComposer !== composer || nextSeat !== composerSeat || nextGoal !== goalPanel) {
         resizeObserver?.disconnect()
         composer = nextComposer
         composerSeat = nextSeat
+        goalPanel = nextGoal
         if ((composer || composerSeat) && typeof ResizeObserver !== 'undefined') {
           resizeObserver = new ResizeObserver(update)
           if (composer) resizeObserver.observe(composer)
           if (composerSeat && composerSeat !== composer) resizeObserver.observe(composerSeat)
+          if (goalPanel) resizeObserver.observe(goalPanel)
         }
       }
       const composerRect = composer?.getBoundingClientRect()
       const seatRect = composerSeat?.getBoundingClientRect()
-      const zoom = Math.max(.5, Number.parseFloat(getComputedStyle(document.body).getPropertyValue('--craft-ui-zoom')) || 1)
+      const goalRect = goalPanel?.getBoundingClientRect()
+      // Narrow layouts force zoom:1 even if the saved scale is compact/large.
+      const overlay = document.querySelector('.craft-overlay')
+      const zoom = Math.max(.5, Number.parseFloat(overlay ? getComputedStyle(overlay).zoom : getComputedStyle(document.body).getPropertyValue('--craft-ui-zoom')) || 1)
       const top = seatRect?.top ?? composerRect?.top
-      const value = typeof top === 'number' && top > window.innerHeight * .55
-        ? Math.max(12, Math.round((window.innerHeight - top + 12) / zoom))
+      const value = typeof top === 'number'
+        ? Math.max(12, Math.round((window.innerHeight - Math.max(0, top) + 12) / zoom))
         : 12
       const left = composerRect ? Math.max(12, Math.round((composerRect.left + 12) / zoom)) : 12
       const right = composerRect ? Math.max(12, Math.round((window.innerWidth - composerRect.right + 12) / zoom)) : 12
-      setClearance(current => current.bottom === value && current.left === left && current.right === right ? current : { bottom: value, left, right })
+      const goalBottom = goalRect ? Math.max(0, Math.round((window.innerHeight - goalRect.bottom + 6) / zoom)) : value
+      const goalLeft = goalRect ? Math.round((goalRect.left + 12) / zoom) : left + 28
+      const goalRight = goalRect ? Math.round((window.innerWidth - goalRect.right + 12) / zoom) : right + 28
+      setClearance(current => current.bottom === value && current.left === left && current.right === right && current.goalBottom === goalBottom && current.goalLeft === goalLeft && current.goalRight === goalRight ? current : { bottom: value, left, right, goalBottom, goalLeft, goalRight })
     }
     const mutationObserver = new MutationObserver(update)
     mutationObserver.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-craft-scale'] })

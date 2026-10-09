@@ -52,11 +52,27 @@ test('active hotbar clears the native task dock and running status footer', asyn
 test('active goal uses a Minecraft task panel with a reserved XP footer', async () => {
   const css = await readFile(join(root, 'src/client/style.css'), 'utf8')
   const overlay = await readFile(join(root, 'src/client/components/CraftOverlay.tsx'), 'utf8')
-  assert.match(css, /\[data-goal-bar\]>div\{[^}]*height:82px!important[^}]*padding:6px 7px 31px!important[^}]*border-radius:0!important/)
+  assert.match(css, /\[data-goal-bar\]>div\{[^}]*height:auto!important;min-height:82px!important[^}]*padding:6px 7px 31px!important[^}]*border-radius:0!important/)
   assert.match(css, /\[data-goal-bar\]>div:after\{[^}]*bottom:27px[^}]*background:#0b0d0b/)
-  assert.match(css, /\.craft-overlay-no-hotbar\.craft-overlay-with-goal \.craft-xp\{[^}]*left:calc\(var\(--craft-composer-left,12px\) \+ 28px\)[^}]*bottom:var\(--craft-hud-bottom,12px\)[^}]*grid-template-columns:34px minmax\(120px,1fr\) 78px/)
+  assert.match(css, /\.craft-overlay-no-hotbar\.craft-overlay-with-goal \.craft-xp\{[^}]*left:var\(--craft-goal-left,40px\)[^}]*bottom:var\(--craft-goal-footer-bottom,var\(--craft-hud-bottom,12px\)\)[^}]*grid-template-columns:34px minmax\(0,1fr\) 78px/)
   assert.match(overlay, /craft-overlay-with-goal/)
   assert.match(overlay, /--craft-composer-left/)
+  assert.match(overlay, /resizeObserver\.observe\(goalPanel\)/)
+  assert.match(overlay, /window\.innerHeight - goalRect\.bottom \+ 6/)
+  assert.match(overlay, /getComputedStyle\(overlay\)\.zoom/)
+  assert.doesNotMatch(overlay, /window\.innerHeight \* \.55/)
+})
+
+test('alpha multiline goal editors keep native auto-height and a six-line pixel skin', async () => {
+  const css = await readFile(join(root, 'src/client/style.css'), 'utf8')
+  assert.match(css, /\[data-goal-bar\] :is\(input,textarea\)[^{]*\{[^}]*line-height:17px!important/)
+  assert.match(css, /\[data-goal-bar\] textarea\{[^}]*max-height:112px!important[^}]*overflow-y:auto/)
+  assert.doesNotMatch(css, /\[data-goal-bar\] textarea\{[^}]*[;{]height:/)
+  assert.match(css, /body\.craft-ui-enabled\{--dsw-font-family:var\(--craft-font\)/)
+  assert.doesNotMatch(css, /--dsh-font-family-(?:text|code|terminal)\s*:/)
+  assert.match(css, /\[class\$="_control"\]\{flex:1 1 100%;flex-wrap:wrap;max-width:100%/)
+  assert.match(css, /\[class\$="_field"\]:has\(>input\)\{flex:1 1 100%;width:100%;min-width:0;max-width:100%/)
+  assert.match(css, /\[role="dialog"\]:has\(\[data-slot="settings.general.item"\]\)\{flex-direction:column!important/)
 })
 
 test('native composer popups take visual priority over the Minecraft bottom HUD', async () => {

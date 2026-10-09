@@ -2,8 +2,9 @@
 
 ## Tested baseline
 
-- DeepSeek Harness Web: `0.2.0-rc.2` (upstream `next` channel, checked 2026-09-29)
-- Craft UI: `0.4.1`
+- DeepSeek Harness Web: `0.2.1-alpha.2` (upstream `alpha` channel, checked 2026-10-10)
+- Backward-compatibility smoke check: `0.2.0-rc.2` (`latest`/`next` at the check date)
+- Craft UI: `0.4.2`
 - Node.js: 22+
 - Client: Chromium/Edge through the Harness web app; Desktop's separate profile is not yet verified
 - Package form: Host + Client DSH plugin
@@ -15,6 +16,14 @@ The plugin registers themes through the Harness theme service and mounts control
 The settings dialog is portalled into `document.body`, outside the sidebar's animation and clipping ancestors. React and React DOM are provided by the Harness module loader, not bundled into the plugin.
 
 Native control styling is scoped to `body.craft-ui-enabled` and targets semantic roles/state attributes rather than generated class hashes. Switches keep their native button event handlers and accessible names; their square thumbs remain within 48×26 pixel tracks. Segmented tabs do not target DockKit editor strips. The font-size stepper lacks a semantic hook, so its local CSS-module name suffix is matched only inside the public `settings.general.item` slot. Selected preset cards that are disabled solely to prevent re-selection (`aria-disabled="false"`) are not styled as unavailable.
+
+### 0.2.1 alpha changes
+
+The native goal dock now uses the shared auto-sizing `InlineEditor` textarea. Craft UI styles both the legacy input and the textarea, leaves the textarea's inline height under native control, caps its pixel line box at six lines, and lets the surrounding task panel grow. Native save/cancel/IME behavior is not replaced. A reserved footer remains at the actual panel bottom; ResizeObserver tracks the goal panel and the composer seat separately. HUD measurements use computed overlay zoom (narrow layouts force 1) and do not assume the composer begins below 55% of the viewport.
+
+The new text font token `--dsw-font-family` resolves to the bundled pixel stack only under the enabled body class. Durable `--dsh-font-family-*` settings are never rewritten; native code/terminal tokens and size preferences are not overridden. Previously pixel-skinned panels keep their explicit typography. Expanded font-family fields and three size steppers retain native actions and wrap within narrow settings columns; at phone widths the native settings navigation becomes a horizontally scrollable row. The local CSS-module suffix fallback remains scoped to the General Settings slot/dialog.
+
+The removal of `conversation.input.stats` does not require a slot migration here: Craft UI never registered it. Native `conversation.input.activity`, `usage` and composer dock behavior remain DSH-owned. Model directory selection, draft revision/insertText, image attachments and notebook source reads were checked against the alpha runtime. No global or daily-profile DSH upgrade is part of these isolated compatibility checks.
 
 Resource operations use exact POST routes under `/api/craft-ui/`, registered through `connection.fetch.register`. This retains Harness authentication, origin checks, body limits, and the Connection RPC envelope. It also avoids the custom-channel `webServer` injection failure in the 0.1.7 Cordis/Connection combination. Import UI controls remain disabled off loopback; the Host's `allowLocalOfficialAssets` setting independently controls imports.
 
@@ -56,7 +65,7 @@ Draft feedback uses only `inputActions.insertText` with the current `draftRev` a
 
 Before supporting a new Harness release, run the full verification suite and a real canary capture of both themes, all settings tabs, narrow layout, and native interaction cards.
 
-`node scripts/verify-live-canary.mjs <startup-log>` uses an isolated headless Edge profile and privately reads the authenticated URL from the local log. It verifies plugin loading, both themes, all Craft settings pages, topmost/clickable dialog placement, narrow layout, the real Host status RPC, and mixed Chinese/Latin composer text. Screenshots are saved under `.generated/compatibility-captures/`. It never submits a model request. Session/HUD mappings and resource envelope failures are covered by automated behavior tests; a live model turn is not part of this smoke test. Compatibility fallbacks for 0.1.5/0.1.7 snapshot shapes remain, but this release's Web live baseline is 0.2.0-rc.2.
+`node scripts/verify-live-canary.mjs <startup-log>` uses an isolated headless Edge profile and privately reads the authenticated URL from the local log. It verifies plugin loading, both themes, all Craft settings pages, topmost/clickable dialog placement, narrow layout, the real Host status RPC, and mixed Chinese/Latin composer text. Screenshots are saved under `.generated/compatibility-captures/`. It never submits a model request. Session/HUD mappings and resource envelope failures are covered by automated behavior tests; a live model turn is not part of this smoke test. Compatibility fallbacks for 0.1.5/0.1.7 snapshot shapes remain; this release's primary Web live baseline is 0.2.1-alpha.2, with 0.2.0-rc.2 smoke coverage.
 
 `node scripts/verify-native-controls.mjs <isolated-startup-log>` additionally visits native General, Plugins, Agent Presets, and Models settings, guide tabs, and permission/model menus. It tests the real switch with Space and real guide tabs with ArrowRight. A separate fixture matrix covers disabled/mixed/invalid states, both themes, and 1440/640/390-pixel widths; these fixture cases are not claimed as live model interactions. It checks reduced motion and restoration when the theme is disabled. Screenshots go to `.generated/native-controls/`. Use an **isolated DSH home**: this test toggles and restores its developer-tools preference. No model requests are submitted. `--local-css` injects the built stylesheet for development; omit it for installed-package verification.
 
@@ -65,3 +74,5 @@ Before supporting a new Harness release, run the full verification suite and a r
 `node scripts/verify-reasoning.mjs <isolated-seeded-startup-log>` checks the real model directory, keyboard and pointer selection, persistence after reload, default reset, model-list navigation, narrow popover bounds, both themes and the legacy setting's persistence/restoration. It changes only the isolated fixture Session's model-selection metadata and submits no model prompt. Screenshots are written to `.generated/native-controls/reasoning-*.png`.
 
 `node scripts/verify-reasoning-fixture.mjs <isolated-startup-log>` supplements this with six-level, single-level, missing-metadata and unknown-effort catalogs, selection failure/retry, Escape cancellation and narrow layouts. Those catalogs are synthetic; they make no network selections.
+
+`node scripts/verify-alpha-layout.mjs .generated/dsh-021-compat/workbench-canary/stdout.log` exercises the real persisted paused goal and native editor: multiline growth, Shift+Enter, Escape and Enter save/restore. Synthetic telemetry mounts the real CraftOverlay over the native composer to check XP placement and active hotbar clearance at 1440/640/390 widths, all scales, both palettes and a short viewport. Font-token changes are temporary CSS probes, not preference writes; code/terminal tokens and native restoration are checked. `--baseline` reports the pre-fix geometry without mutations. The seeder accepts only two explicitly allowlisted disposable homes. No agent/model request is made. Native-controls verification additionally expands the new font settings when available and checks fields/steppers at all three widths.

@@ -25,3 +25,5 @@
 - [ ] Default reasoning slider uses real model metadata; pointer preview never writes until release, keyboard selection persists, reset follows model defaults, and stale gestures/failures preserve authoritative selection.
 - [ ] Legacy reasoning preference survives reload, unregisters the custom slot and restores the genuine native menu; disabling Craft UI does the same.
 - [ ] Compact reasoning panel puts an explicit bordered model-switch button first; long model names preserve the action, keyboard model switching works, and four/six-level layouts fit narrow screens.
+- [ ] Alpha multiline goal editor grows and scrolls; native Enter/Shift+Enter/Escape behavior stays intact; XP footer and active HUD clear the measured panel/seat at all scales and short/narrow viewports.
+- [ ] Text font token uses pixel rendering only while enabled; saved text preferences and code/terminal font roles are preserved; expanded font settings fit 1440/640/390 widths.
