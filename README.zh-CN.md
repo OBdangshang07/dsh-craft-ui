@@ -28,10 +28,10 @@
 - 在现有开放 ShadowRoot 内为“应用/编辑”标题菜单按钮添加像素外观，不替换节点、文字、点击处理、键盘导航和原生操作。关闭或卸载插件只移除自身样式，支持菜单延迟创建和替换。
 - 弹窗允许原生标题菜单获得焦点，同时继续阻止焦点进入背后的对话；页面控件不充当窗口拖动区。
 
-桌面端使用独立的 `desktop` 配置，在 `craft-ui-canary` 中安装不会自动同步。请先结束任务并关闭桌面端；确认 DSH CLI 与客户端版本一致（本次为 `0.2.0-rc.2`）后，在本仓库目录执行：
+桌面端使用独立的 `desktop` 配置，在 `craft-ui-canary` 中安装不会自动同步。请先结束任务并完全退出桌面端，再使用客户端自带的命令入口（已验证 `0.2.0-rc.2`）。单独通过 npm 安装的 CLI 会拒绝管理此保留配置。在本仓库目录的 PowerShell 中执行（自定义安装位置需相应调整路径）：
 
-```sh
-dsh plugin --profile desktop add .generated/packs/dsh-craft-ui-0.4.3.tgz
+```powershell
+& "$env:LOCALAPPDATA\Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add .generated/packs/dsh-craft-ui-0.4.3.tgz
 ```
 
 随后重新打开客户端。原有 bundle 配置和会话仍由 DSH 管理，不替换 `app.asar`，也不要用 Web 配置覆盖桌面配置。操作系统弹出菜单、最小化/最大化/关闭按钮及系统对话框保持原生，不强行重绘。macOS/Linux 桌面外壳尚未验证。
@@ -101,7 +101,7 @@ dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.3.tgz
 
 ## 兼容性
 
-`0.4.3` 增加 Windows Desktop `0.2.0-rc.2` 适配，并保留 Web `0.2.1-alpha.2` 兼容（2026-10-16 核验）。使用客户端自带的 Electron/Node Host 和 Windows 构建的前端包，在隔离配置中测试。无头渲染器测试使用客户端实际菜单代码，但原生 IPC 为测试替身，不等同于实际 Electron 窗口及系统菜单的交互验收。本次没有修改日常桌面配置或打断任务，也不要求升级 DSH。具体覆盖范围见 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界见 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
+`0.4.3` 增加 Windows Desktop `0.2.0-rc.2` 适配，并保留 Web `0.2.1-alpha.2` 兼容（2026-10-16 核验）。使用客户端自带的 Electron/Node Host 和 Windows 构建的前端包，在隔离配置中测试。无头渲染器测试使用客户端实际菜单代码，但原生 IPC 为测试替身，不等同于实际 Electron 窗口及系统菜单的交互验收。随后经用户授权安装、重启，通过临时浏览器检查了实际桌面 Host 的插件加载与状态 RPC；仍不宣称完成原生系统菜单和桌面代理的端到端验收，也不要求升级 DSH。具体覆盖范围见 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界见 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
 
 保留 0.4.2 的多行目标编辑器、按实际面板定位的经验值栏、原生字体设置和响应式 HUD 适配。图片工作台、书签持久化和推理/模型选择测试不提交模型请求；旧版 Session 快照的兼容回退仍由自动化契约测试覆盖。
 

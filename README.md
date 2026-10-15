@@ -28,10 +28,10 @@ The published package is self-contained: it includes the original MIT-licensed p
 - Pixel-styled application/edit caption buttons in the existing open ShadowRoot. Native nodes, labels, pointer handling, keyboard navigation and menu actions are retained. Disabling/unloading removes only Craft UI's added style; late/replaced menus are supported.
 - Dialog focus traps allow the native caption menu while continuing to block focus into the conversation behind the dialog. Page controls remain outside window-drag regions.
 
-The desktop app owns a separate `desktop` profile; an installation in `craft-ui-canary` does not carry over. Finish running tasks and close Desktop before installing. With a matching DSH CLI (`0.2.0-rc.2` for the tested Desktop), run from this repository:
+The desktop app owns a separate `desktop` profile; an installation in `craft-ui-canary` does not carry over. Finish running tasks and fully quit Desktop before installing. Use the Desktop installation's own command carrier (`0.2.0-rc.2` tested), not a separately installed npm CLI, which rejects this reserved profile. From this repository, in PowerShell (adjust the installation path if needed):
 
-```sh
-dsh plugin --profile desktop add .generated/packs/dsh-craft-ui-0.4.3.tgz
+```powershell
+& "$env:LOCALAPPDATA\Programs\DeepSeek Harness\resources\runtime\cli\bin\dsh.cmd" plugin --profile desktop add .generated/packs/dsh-craft-ui-0.4.3.tgz
 ```
 
 Then reopen the Desktop app. Existing profile bundles and conversations remain owned by DSH. Do not replace `app.asar` or copy the Web profile over the Desktop profile. Native OS popup menus, minimize/maximize/close buttons and system dialogs deliberately remain native. macOS/Linux desktop shells have not been validated.
@@ -101,7 +101,7 @@ In DSH 0.2.1, Craft UI overrides the interface text token while enabled without 
 
 ## Compatibility
 
-Version `0.4.3` adds Windows Desktop `0.2.0-rc.2` support and retains Web `0.2.1-alpha.2` compatibility (checked 2026-10-16). Desktop's bundled Electron/Node Host and Windows-built client packages were tested in an isolated profile. Headless renderer tests use the shipped caption-menu code with mocked native IPC; this is not an interactive Electron-window/OS-menu acceptance test. No daily Desktop profile or running task was modified. The alpha channel is opt-in; no DSH upgrade is required. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for exact coverage and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
+Version `0.4.3` adds Windows Desktop `0.2.0-rc.2` support and retains Web `0.2.1-alpha.2` compatibility (checked 2026-10-16). Desktop's bundled Electron/Node Host and Windows-built client packages were tested in an isolated profile. Headless renderer tests use the shipped caption-menu code with mocked native IPC; this is not an interactive Electron-window/OS-menu acceptance test. A subsequent authorized installation/restart checked the real Desktop Host's plugin loading and status RPC through a disposable browser; native OS-menu/proxy acceptance is still not claimed. The alpha channel is opt-in; no DSH upgrade is required. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for exact coverage and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
 
 The multiline goal editor, measured XP footer, native font settings and responsive HUD compatibility introduced in 0.4.2 are retained. Image workbench, notebook persistence and reasoning/model selection are checked without submitting model requests. Older Session snapshot fallbacks remain covered by automated contract tests.
 
