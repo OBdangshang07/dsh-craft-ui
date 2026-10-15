@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { ItemIcon } from '../components/ItemIcon.tsx'
+import { isDesktopMenuEvent } from '../desktop.ts'
 
 export function useTranslate() {
   const [language, setLanguage] = useState(() => document.documentElement.lang || navigator.language)
@@ -21,6 +22,7 @@ export function CraftDialog({ title, icon = 'map', children, onClose, wide = fal
     const controls = () => [...node.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"]')].filter(e => e.getClientRects().length > 0)
     ;(controls()[0] ?? node).focus({ preventScroll: true })
     const onKey = (event: KeyboardEvent) => {
+      if (isDesktopMenuEvent(event)) return
       if ([...document.querySelectorAll('.craft-workbench')].at(-1) !== node) return
       if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close.current(); return }
       if (event.key !== 'Tab') return
@@ -29,7 +31,7 @@ export function CraftDialog({ title, icon = 'map', children, onClose, wide = fal
       if (event.shiftKey && index <= 0) { event.preventDefault(); items.at(-1)!.focus() }
       else if (!event.shiftKey && (index < 0 || index === items.length - 1)) { event.preventDefault(); items[0].focus() }
     }
-    const holdFocus = (event: FocusEvent) => { if ([...document.querySelectorAll('.craft-workbench')].at(-1) === node && !node.contains(event.target as Node)) (controls()[0] ?? node).focus({ preventScroll: true }) }
+    const holdFocus = (event: FocusEvent) => { if (!isDesktopMenuEvent(event) && [...document.querySelectorAll('.craft-workbench')].at(-1) === node && !node.contains(event.target as Node)) (controls()[0] ?? node).focus({ preventScroll: true }) }
     document.addEventListener('keydown', onKey, true)
     document.addEventListener('focusin', holdFocus)
     return () => { document.removeEventListener('keydown', onKey, true); document.removeEventListener('focusin', holdFocus); if (opener?.isConnected) opener.focus({ preventScroll: true }) }

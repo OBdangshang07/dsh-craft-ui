@@ -8,6 +8,7 @@ import { createResourcePackBridge } from './resource.ts'
 import { installUiSounds } from './sound.ts'
 import { installWorkbench } from './workbench/index.tsx'
 import { installReasoningControl } from './components/ReasoningControl.tsx'
+import { installDesktopSkin } from './desktop.ts'
 import CSS from './generated-styles.ts'
 
 export const inject = ['slots', 'theme', 'connection', 'sessions', 'uiSession', 'uiConversation']
@@ -82,6 +83,8 @@ export function apply(ctx: any): void {
       style.remove()
     }
   }, 'craft-ui: styles and preferences')
+
+  ctx.effect(installDesktopSkin, 'craft-ui: reversible desktop caption skin')
 
   ctx.effect(installUiSounds, 'craft-ui: synthesized interface sounds')
 

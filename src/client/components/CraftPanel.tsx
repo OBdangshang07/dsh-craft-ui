@@ -5,6 +5,7 @@ import { ItemIcon } from './ItemIcon.tsx'
 import { setPreferences, usePreferences } from '../store.ts'
 import type { CraftPreferences } from '../types.ts'
 import type { ResourcePackBridge, ResourcePackStatus } from '../resource.ts'
+import { isDesktopMenuEvent } from '../desktop.ts'
 
 type OptionsPage = 'options' | 'gameplay' | 'assets' | 'workbench'
 
@@ -25,6 +26,7 @@ export function CraftPanel({ onClose, resource }: { onClose: () => void, resourc
   }, [resource])
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (isDesktopMenuEvent(event)) return
       if (event.key === 'Escape') {
         event.preventDefault()
         page === 'options' ? onClose() : setPage('options')

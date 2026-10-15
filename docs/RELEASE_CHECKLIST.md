@@ -27,3 +27,6 @@
 - [ ] Compact reasoning panel puts an explicit bordered model-switch button first; long model names preserve the action, keyboard model switching works, and four/six-level layouts fit narrow screens.
 - [ ] Alpha multiline goal editor grows and scrolls; native Enter/Shift+Enter/Escape behavior stays intact; XP footer and active HUD clear the measured panel/seat at all scales and short/narrow viewports.
 - [ ] Text font token uses pixel rendering only while enabled; saved text preferences and code/terminal font roles are preserved; expanded font settings fit 1440/640/390 widths.
+- [ ] Windows Desktop caption remains clickable under settings/workbench dialogs; native menu pointer/arrow navigation and composed focus events are retained.
+- [ ] Caption skin is reversible on disable/dispose/replacement and never changes native handlers, window buttons or OS popups.
+- [ ] Desktop safe-area tests cover both palettes, all scales, short/narrow windows, and fullscreen with/without the native menubar; bundled-runtime versus native-IPC fixture coverage is explicitly distinguished.

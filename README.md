@@ -22,6 +22,20 @@ The published package is self-contained: it includes the original MIT-licensed p
 - Minecraft-styled settings, approval, question, and plan-review surfaces without replacing native actions or risk copy.
 - Java Edition-style Options navigation: centered two-column option buttons, dedicated HUD and resource-pack subpages, and a bottom Done/Back action instead of desktop-style tabs and dropdowns.
 
+## 0.4.3: Windows Desktop
+
+- Caption-safe settings, image workbench, notebook, HUD and model/reasoning popovers. The Windows title area is reserved at every UI scale and narrow/short window size. Fullscreen releases the inset only when the caption menubar is absent; DSH 0.2.0 keeps that menu visible in fullscreen.
+- Pixel-styled application/edit caption buttons in the existing open ShadowRoot. Native nodes, labels, pointer handling, keyboard navigation and menu actions are retained. Disabling/unloading removes only Craft UI's added style; late/replaced menus are supported.
+- Dialog focus traps allow the native caption menu while continuing to block focus into the conversation behind the dialog. Page controls remain outside window-drag regions.
+
+The desktop app owns a separate `desktop` profile; an installation in `craft-ui-canary` does not carry over. Finish running tasks and close Desktop before installing. With a matching DSH CLI (`0.2.0-rc.2` for the tested Desktop), run from this repository:
+
+```sh
+dsh plugin --profile desktop add .generated/packs/dsh-craft-ui-0.4.3.tgz
+```
+
+Then reopen the Desktop app. Existing profile bundles and conversations remain owned by DSH. Do not replace `app.asar` or copy the Web profile over the Desktop profile. Native OS popup menus, minimize/maximize/close buttons and system dialogs deliberately remain native. macOS/Linux desktop shells have not been validated.
+
 ## 0.4.0: Maps & Quills
 
 - **Reasoning slider (default)**: Minecraft-style discrete stops, a square stone thumb, green track, current effort and model-default reset. Levels come exclusively from the selected model's adapter. Drag to preview and release to apply, or use stop labels, arrows and Home/End. Only the next request is affected. The compact panel puts an explicit **Model / Change ▾** button first; long model names never displace the action. **Craft UI → 选项 → 推理等级控件** switches to the persisted **旧版菜单** (legacy menu) preference. This removes the replacement slot and restores DSH's original control; disabling the theme restores it too.
@@ -44,7 +58,7 @@ Requires Node.js 22 or newer and a compatible DeepSeek Harness build.
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.2.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.3.tgz
 ```
 
 The plugin is a DSH Host + Client combo package. `cordis.patch.yml` inserts its stable bundle layer; the client uses documented theme, slot, connection, session, and conversation services.
@@ -87,9 +101,9 @@ In DSH 0.2.1, Craft UI overrides the interface text token while enabled without 
 
 ## Compatibility
 
-Version `0.4.2` targets DeepSeek Harness Web `0.2.1-alpha.2` (checked 2026-10-10), with a backward-compatibility smoke check on `0.2.0-rc.2`. The alpha channel is opt-in; updating this plugin does not require upgrading a stable DSH installation. Desktop's separate application-owned profile has not been tested. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for the integration contract and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
+Version `0.4.3` adds Windows Desktop `0.2.0-rc.2` support and retains Web `0.2.1-alpha.2` compatibility (checked 2026-10-16). Desktop's bundled Electron/Node Host and Windows-built client packages were tested in an isolated profile. Headless renderer tests use the shipped caption-menu code with mocked native IPC; this is not an interactive Electron-window/OS-menu acceptance test. No daily Desktop profile or running task was modified. The alpha channel is opt-in; no DSH upgrade is required. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) for exact coverage and [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md) for the asset boundary.
 
-This release adapts the native multiline goal editor: a growing pixel-styled panel, six-line scrolling, original Enter/Shift+Enter/Escape behavior, and an XP footer anchored to the measured goal bounds. HUD positioning uses the actual responsive zoom and clears tall composer seats. The new text/code/terminal font settings retain their native actions and fit narrow settings columns. Image workbench, notebook persistence and the reasoning/model picker were rechecked in an isolated alpha profile without submitting model requests. Compatibility fallbacks for older Session snapshots remain covered by automated contract tests.
+The multiline goal editor, measured XP footer, native font settings and responsive HUD compatibility introduced in 0.4.2 are retained. Image workbench, notebook persistence and reasoning/model selection are checked without submitting model requests. Older Session snapshot fallbacks remain covered by automated contract tests.
 
 ## Verification
 

@@ -4,6 +4,7 @@ import { defaultSelection, effortSelection, modelMatchesQuery, reasoningView, ty
 import { getPreferences, subscribePreferences } from '../store.ts'
 import { useTranslate } from '../workbench/ui.tsx'
 import { ItemIcon } from './ItemIcon.tsx'
+import { desktopTopInset } from '../desktop.ts'
 
 interface Directory {
   store: { subscribe: (fn: () => void) => () => void, getSnapshot: () => ModelState }
@@ -66,13 +67,16 @@ export function ReasoningControl({ directory, locked, available }: { directory: 
       if (!rect || !box) return
       const viewport = window.visualViewport, left = viewport?.offsetLeft ?? 0, top = viewport?.offsetTop ?? 0
       const width = viewport?.width ?? innerWidth, height = viewport?.height ?? innerHeight
-      setPosition({ left: Math.max(left + 8, Math.min(rect.right - box.offsetWidth, left + width - box.offsetWidth - 8)), top: Math.max(top + 8, Math.min(rect.top - box.offsetHeight - 8, top + height - box.offsetHeight - 8)) })
+      const safeTop = Math.max(top, desktopTopInset())
+      setPosition({ left: Math.max(left + 8, Math.min(rect.right - box.offsetWidth, left + width - box.offsetWidth - 8)), top: Math.max(safeTop + 8, Math.min(rect.top - box.offsetHeight - 8, top + height - box.offsetHeight - 8)) })
     }
     place()
     const observer = new ResizeObserver(place); if (popup.current) observer.observe(popup.current)
+    const chromeObserver = new MutationObserver(place)
+    chromeObserver.observe(document.documentElement, { attributes:true, attributeFilter:['data-windows-titlebar','data-fullscreen','style'] })
     window.addEventListener('resize', place); window.addEventListener('scroll', place, true)
     window.visualViewport?.addEventListener('resize', place)
-    return () => { observer.disconnect(); window.removeEventListener('resize', place); window.removeEventListener('scroll', place, true); window.visualViewport?.removeEventListener('resize', place) }
+    return () => { observer.disconnect(); chromeObserver.disconnect(); window.removeEventListener('resize', place); window.removeEventListener('scroll', place, true); window.visualViewport?.removeEventListener('resize', place) }
   }, [open, models])
   useEffect(() => {
     if (!open) return

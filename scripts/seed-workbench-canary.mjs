@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 
 const root = resolve(import.meta.dirname, '..')
-const canaryDirectories = [join(root, '.generated', 'workbench-canary'), join(root, '.generated', 'dsh-021-compat', 'workbench-canary')]
+const canaryDirectories = [join(root, '.generated', 'workbench-canary'), join(root, '.generated', 'dsh-021-compat', 'workbench-canary'), join(root, '.generated', 'desktop-workbench-canary')]
 export const inject = ['sessionPersistence', 'attachments', 'workspaceRegistry']
 export async function apply(ctx) {
   const directory = canaryDirectories.find(dir => process.env.DSH_HOME && resolve(process.env.DSH_HOME) === join(dir, 'home'))

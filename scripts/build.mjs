@@ -24,6 +24,7 @@ await build({
 let css = await readFile(join(root, 'src', 'client', 'style.css'), 'utf8')
 css += '\n' + await readFile(join(root, 'src', 'client', 'workbench.css'), 'utf8')
 css += '\n' + await readFile(join(root, 'src', 'client', 'reasoning.css'), 'utf8')
+css += '\n' + await readFile(join(root, 'src', 'client', 'desktop.css'), 'utf8')
 const embeddedAssets = {
   ASSET_BUTTON_NORMAL: { path: join(generated, 'button-normal.png'), mime: 'image/png' },
   ASSET_BUTTON_HOVER: { path: join(generated, 'button-hover.png'), mime: 'image/png' },

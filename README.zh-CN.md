@@ -22,6 +22,20 @@
 - 在不替换原生操作及风险说明的前提下，为设置、确认、提问和计划审查界面应用 Minecraft 风格。
 - 采用 Java 版风格的“选项”导航：居中的双列选项按钮、独立的 HUD 与资源包子页面，以及底部的“完成/返回”按钮，不再使用桌面应用式标签页和下拉框。
 
+## 0.4.3「Windows 桌面适配」
+
+- 设置、图片工作台、书签、HUD 与模型/推理弹窗避让 Windows 标题栏，覆盖三档缩放及窄屏、矮窗口。全屏时只有标题菜单不存在才释放空间；DSH 0.2.0 全屏后仍保留菜单，因此继续预留顶部区域。
+- 在现有开放 ShadowRoot 内为“应用/编辑”标题菜单按钮添加像素外观，不替换节点、文字、点击处理、键盘导航和原生操作。关闭或卸载插件只移除自身样式，支持菜单延迟创建和替换。
+- 弹窗允许原生标题菜单获得焦点，同时继续阻止焦点进入背后的对话；页面控件不充当窗口拖动区。
+
+桌面端使用独立的 `desktop` 配置，在 `craft-ui-canary` 中安装不会自动同步。请先结束任务并关闭桌面端；确认 DSH CLI 与客户端版本一致（本次为 `0.2.0-rc.2`）后，在本仓库目录执行：
+
+```sh
+dsh plugin --profile desktop add .generated/packs/dsh-craft-ui-0.4.3.tgz
+```
+
+随后重新打开客户端。原有 bundle 配置和会话仍由 DSH 管理，不替换 `app.asar`，也不要用 Web 配置覆盖桌面配置。操作系统弹出菜单、最小化/最大化/关闭按钮及系统对话框保持原生，不强行重绘。macOS/Linux 桌面外壳尚未验证。
+
 ## 0.4.0「地图与书签」
 
 - **推理等级滑动条**：默认启用 Minecraft 风格的分档滑条，包含方形石质滑块、绿色刻度、当前等级及恢复默认按钮。只使用当前模型实际公布的等级；支持拖动、点选档位、方向键和 Home/End。拖动预览不写入，松手或键盘操作完成后才应用到下一次请求。紧凑面板顶部提供独立的 **模型 / 切换 ▾** 按钮，长模型名称不会挤掉切换入口。可在 **Craft UI → 选项 → 推理等级控件** 切回 **旧版菜单**，设置会保留；关闭主题也会恢复 DSH 原生控件。
@@ -44,7 +58,7 @@
 pnpm install
 pnpm run verify
 pnpm pack --pack-destination .generated/packs
-dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.2.tgz
+dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.3.tgz
 ```
 
 该插件是一个 DSH Host + Client 组合包。`cordis.patch.yml` 会插入稳定的 bundle 层；客户端使用 Harness 已公开的主题、插槽、连接、会话和对话服务。
@@ -87,9 +101,9 @@ dsh plugin --profile craft-ui-canary add .generated/packs/dsh-craft-ui-0.4.2.tgz
 
 ## 兼容性
 
-`0.4.2` 适配 DeepSeek Harness Web `0.2.1-alpha.2`（2026-10-10 核验），同时在 `0.2.0-rc.2` 上做了向后兼容冒烟测试。alpha 通道需要主动选择；更新插件不要求将稳定版 DSH 升级到 alpha。桌面版独立管理的 profile 尚未实测。集成契约请参阅 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界请参阅 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
+`0.4.3` 增加 Windows Desktop `0.2.0-rc.2` 适配，并保留 Web `0.2.1-alpha.2` 兼容（2026-10-16 核验）。使用客户端自带的 Electron/Node Host 和 Windows 构建的前端包，在隔离配置中测试。无头渲染器测试使用客户端实际菜单代码，但原生 IPC 为测试替身，不等同于实际 Electron 窗口及系统菜单的交互验收。本次没有修改日常桌面配置或打断任务，也不要求升级 DSH。具体覆盖范围见 [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md)，素材边界见 [docs/ASSET_POLICY.md](docs/ASSET_POLICY.md)。
 
-本版适配原生多行目标编辑器：像素面板自动增高、超过六行滚动，保留 Enter 保存、Shift+Enter 换行和 Escape 取消；经验值栏按目标面板实际边界定位。HUD 使用真实的响应式缩放比例，避让增高后的输入区。新增的正文/代码/终端字体设置保留原生操作，并适配窄屏设置列。图片工作台、书签持久化和推理/模型选择均在隔离 alpha profile 中复测，未提交模型请求。旧版 Session 快照的兼容回退仍有自动化契约测试覆盖。
+保留 0.4.2 的多行目标编辑器、按实际面板定位的经验值栏、原生字体设置和响应式 HUD 适配。图片工作台、书签持久化和推理/模型选择测试不提交模型请求；旧版 Session 快照的兼容回退仍由自动化契约测试覆盖。
 
 ## 验证
 

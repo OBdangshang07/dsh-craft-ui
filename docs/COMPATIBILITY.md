@@ -2,11 +2,11 @@
 
 ## Tested baseline
 
-- DeepSeek Harness Web: `0.2.1-alpha.2` (upstream `alpha` channel, checked 2026-10-10)
-- Backward-compatibility smoke check: `0.2.0-rc.2` (`latest`/`next` at the check date)
-- Craft UI: `0.4.2`
+- DeepSeek Harness Web: `0.2.1-alpha.2` (checked 2026-10-16; opt-in alpha)
+- Windows Desktop bundled runtime: `0.2.0-rc.2`, Electron `44.0.0`, Node `24.18.1`
+- Craft UI: `0.4.3`
 - Node.js: 22+
-- Client: Chromium/Edge through the Harness web app; Desktop's separate profile is not yet verified
+- Renderer: Chromium/Edge; Desktop caption source is executed with mocked native IPC, not an interactive OS-menu test
 - Package form: Host + Client DSH plugin
 
 ## Stable integration points
@@ -14,6 +14,16 @@
 The plugin registers themes through the Harness theme service and mounts controls through `sidebar.footer.action` and `shell.overlay`. The selected Session is the catalog row with a `retainedBy.mainView` reference; its binding remains owned by Harness. Chat nodes and running calls come from the `uiConversation` `chat` target, and pending interactions come from `uiSession.sessionStatus`. Gameplay overlays hide on global settings/plugin panels. It recognizes native interaction surfaces through the data attributes `data-approval-key`, `data-question-key`, and `data-plan-review-key`.
 
 The settings dialog is portalled into `document.body`, outside the sidebar's animation and clipping ancestors. React and React DOM are provided by the Harness module loader, not bundled into the plugin.
+
+### Windows Desktop shell
+
+Desktop still uses `dsh.client.platform: web`; changing it to a nonexistent `desktop` client target would prevent loading. Its application-owned `desktop` profile is independent of `craft-ui-canary`. The Windows ASAR's conversation/theme/model/goal/chat modules match the tested rc.2 Web modules after removing build-path comments and generated CSS-module prefixes. No package injection names need changing.
+
+`desktop.css` derives page-owned dialog/HUD clearance from the shell's root markers and `--dsh-windows-titlebar-height`. Settings and workbench heights use the remaining viewport. HUD top offsets compensate actual zoom; model popovers clamp to the caption-safe top and recompute on fullscreen/viewport changes. Windows 0.2.0 retains its caption menu in fullscreen, so a direct-body `data-windows-menu` host keeps the inset; without that host fullscreen uses zero clearance. Dialog surfaces explicitly opt out of Electron window dragging.
+
+The caption adapter adds only an owned stylesheet to the existing direct-body Windows menu's open ShadowRoot. It never creates a replacement menubar, alters native handlers/labels/tab indexes, invokes native IPC, or opens closed roots. The native popup anchor coordinates continue to use the existing buttons. Width is bounded to avoid the native caption-button area. Both palettes and focus/expanded states are styled. Disable, host replacement and plugin disposal remove only owned styles and disconnect observers/subscriptions. Modal keyboard/focus traps recognize composed native-menu events while still trapping ordinary background focus.
+
+Native system popup menus, titlebar window buttons, account/update windows and OS dialogs are out of scope. No application ASAR, Electron startup options or daily profile is patched. This release was not installed into the user's running Desktop profile during development. macOS/Linux shell behavior is not claimed as tested.
 
 Native control styling is scoped to `body.craft-ui-enabled` and targets semantic roles/state attributes rather than generated class hashes. Switches keep their native button event handlers and accessible names; their square thumbs remain within 48×26 pixel tracks. Segmented tabs do not target DockKit editor strips. The font-size stepper lacks a semantic hook, so its local CSS-module name suffix is matched only inside the public `settings.general.item` slot. Selected preset cards that are disabled solely to prevent re-selection (`aria-disabled="false"`) are not styled as unavailable.
 
@@ -75,4 +85,8 @@ Before supporting a new Harness release, run the full verification suite and a r
 
 `node scripts/verify-reasoning-fixture.mjs <isolated-startup-log>` supplements this with six-level, single-level, missing-metadata and unknown-effort catalogs, selection failure/retry, Escape cancellation and narrow layouts. Those catalogs are synthetic; they make no network selections.
 
-`node scripts/verify-alpha-layout.mjs .generated/dsh-021-compat/workbench-canary/stdout.log` exercises the real persisted paused goal and native editor: multiline growth, Shift+Enter, Escape and Enter save/restore. Synthetic telemetry mounts the real CraftOverlay over the native composer to check XP placement and active hotbar clearance at 1440/640/390 widths, all scales, both palettes and a short viewport. Font-token changes are temporary CSS probes, not preference writes; code/terminal tokens and native restoration are checked. `--baseline` reports the pre-fix geometry without mutations. The seeder accepts only two explicitly allowlisted disposable homes. No agent/model request is made. Native-controls verification additionally expands the new font settings when available and checks fields/steppers at all three widths.
+`node scripts/verify-alpha-layout.mjs .generated/dsh-021-compat/workbench-canary/stdout.log` exercises the real persisted paused goal and native editor: multiline growth, Shift+Enter, Escape and Enter save/restore. Synthetic telemetry mounts the real CraftOverlay over the native composer to check XP placement and active hotbar clearance at 1440/640/390 widths, all scales, both palettes and a short viewport. Font-token changes are temporary CSS probes, not preference writes; code/terminal tokens and native restoration are checked. `--baseline` reports the pre-fix geometry without durable mutations. The seeder accepts only three explicitly allowlisted disposable homes. No agent/model request is made. Native-controls verification additionally expands the new font settings when available and checks fields/steppers at all three widths.
+
+`node scripts/verify-desktop.mjs .generated/desktop-workbench-canary/stdout.log` requires the installed Windows Desktop (override `CRAFT_DESKTOP_ROOT` if needed). The canary Host is the application's bundled `dsh` CLI running through its Electron executable with `ELECTRON_RUN_AS_NODE=1`, a disposable `DSH_HOME=.generated/desktop-workbench-canary/home`, and an isolated `craft-desktop-test` profile with the packed plugin. It uses an OS-assigned port, not Desktop Host's fixed port, and never attaches to/restarts the daily application. The synthetic Session seeder must be re-exported from a generated package with its own non-client `package.json`; loading it directly from this source package would register Craft UI a second time in the rc.2 client-module registry.
+
+The headless renderer runs the shipped `installWindowsMenu` source, with native IPC replaced only in that test document. It checks native pointer/arrow navigation, caption-menu Escape versus dialog Escape, background focus trapping, skin disable/re-enable and host replacement, fullscreen with/without a menu, both palettes, four window sizes, three scales, measured HUD clearance, image/notebook dialogs and short-window model popovers. The normal workbench/reasoning/native-control suites additionally exercise the real packaged Desktop Host services and persisted synthetic attachments. Tests submit no model requests. This verifies the bundled runtime and renderer contract, not actual OS menu invocation, native drag/maximize controls or the `dsh-app://` Electron proxy end to end. Screenshots remain under `.generated/native-controls/` and are not shipped.

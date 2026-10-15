@@ -1,0 +1,16 @@
+/* Native shell markers, not UA sniffing. Browser layouts keep a zero inset. */
+:root{--craft-chrome-top:var(--dsh-frame-chrome-top,0px);--craft-viewport-height:calc(100dvh - var(--craft-chrome-top))}
+html[data-windows-titlebar]:not([data-fullscreen="true"]){--craft-chrome-top:var(--dsh-windows-titlebar-height,40px)}
+html[data-fullscreen="true"]{--craft-chrome-top:0px}
+/* Windows 0.2.0 keeps its page-owned menubar visible in fullscreen. */
+html[data-windows-titlebar][data-fullscreen="true"]:has(body>[data-windows-menu]){--craft-chrome-top:var(--dsh-windows-titlebar-height,40px)}
+.craft-panel-shade,.craft-workbench-shade{top:var(--craft-chrome-top);-webkit-app-region:no-drag;app-region:no-drag}
+html[data-windows-titlebar] .craft-control-panel{width:min(960px,calc((100vw - 24px) / var(--craft-ui-zoom,1)));height:min(720px,calc((var(--craft-viewport-height) - 24px) / var(--craft-ui-zoom,1)))}
+.craft-overlay{--craft-effective-zoom:var(--craft-ui-zoom,1);top:calc(var(--craft-chrome-top) / var(--craft-effective-zoom))}
+body.craft-ui-enabled .craft-reasoning-popup{max-height:calc(var(--craft-viewport-height) - 16px);-webkit-app-region:no-drag;app-region:no-drag}
+body.craft-ui-enabled{--craft-menu-light:#8e958b;--craft-menu-dark:#171b14;--craft-menu-fill:#424a3f;--craft-menu-hover:#596b50;--craft-menu-text:#f0edda;--craft-menu-focus:#e5edb0}
+body.craft-ui-enabled[data-craft-theme="craft-day"]{--craft-menu-light:#fff5d9;--craft-menu-dark:#514e42;--craft-menu-fill:#817f70;--craft-menu-hover:#637d4b;--craft-menu-text:#fffbed;--craft-menu-focus:#f2efc6}
+@media(max-width:760px){
+  .craft-overlay{--craft-effective-zoom:1}
+  html[data-windows-titlebar] .craft-control-panel{width:100vw;height:var(--craft-viewport-height)}
+}
